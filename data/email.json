@@ -1,0 +1,113 @@
+{
+  "rejection_emails": [
+    {
+      "company_id": "Company_A",
+      "email_text": "Hi [Name], Thank you again for applying for the position of Junior Data Engineer at [Company_A]. We appreciate your interest in joining our team and we are grateful for the time and effort you put into your application. After reviewing your profile, we're sorry to inform you that we won't be moving forward with your application at this time. This wasn't an easy decision, as we received many strong applications for this role. While we were impressed by your experience, we've decided to move ahead with candidates whose skills and previous job experiences more closely align with our current needs. Please rest assured that not progressing with your profile does not reflect a lack of appreciation for your skills and experience. Although we're not taking things further today, we hope our paths will cross again in the future. We encourage you to keep an eye on our Career page for future opportunities; as we are a fast-growing company, we do open new positions frequently! Wishing you all the best in your next steps!",
+      "position_applied": "Junior Data Engineer"
+    },
+    {
+      "company_id": "Company_B",
+      "email_text": "Hello, Thank you for your interest in joining the [Company_B] team. We reviewed your application, and unfortunately, we decided not to proceed. Shortlisting the best candidates is hard. Although your resume is competitive, I had to choose amongst a lot of great candidates for the job: sorry! (Keep in mind that I can make mistakes :)) If it might help you for future applications, here is what recruiters like to see in resumes: Beautifully designed, Resume adapted to the job position (as it shows your motivation), i.e. : Catch phrase adapted to company, Highlight (or set bold) what matters for the job position, Key elements we need to qualify easily visible: your city, languages, phone, email, etc. No need to write a lot: 1 page is often better (imagine we have to check hundreds of resumes). Good luck finding your dream job.",
+      "position_applied": "Software Role"
+    },
+    {
+      "company_id": "Company_C",
+      "email_text": "Hi [Name], Thanks for your application with [Company_C]! Unfortunately, we have chosen not to take your application to the next round of our hiring process for the Junior Analytics Engineer position. We have received a great amount of applications for this position and we've decided to move forward with other candidates whose experience and skills are more in line with what we're currently looking for at this time. Things can change fast though! So we would like to include your resume in our database for a period of 2 years. We'll contact you if we have an open position that might be a good match for you. If you don't want us to keep your resume, please let us know in a reply to this email. If at any point in time you would like to view, alter or have your data deleted from our database, please let us know. We wish you all the best in your job search and future professional endeavors.",
+      "position_applied": "Junior Analytics Engineer"
+    },
+    {
+      "company_id": "Company_D",
+      "email_text": "Hi [Name], Thanks for taking the time to apply for the Data Analyst (For Independent contractors) gig. We're sorry, but you haven't been selected this time. Unfortunately, the hiring team has decided to move forward with another candidate based on their previous work experience and skill set. Hopefully your next gig with us is just around the corner. We'll let you know when we have another gig that matches your skills.",
+      "position_applied": "Data Analyst (Contractor)"
+    },
+    {
+      "company_id": "Company_E",
+      "email_text": "Thank you for your interest in the Full Stack Developer (focus back-end) position at [Company_E]. Unfortunately, we will not be moving forward with your application, but we appreciate your time and interest in [Company_E].",
+      "position_applied": "Full Stack Developer"
+    },
+    {
+      "company_id": "Company_F",
+      "email_text": "Hi [Name], Thank you again for your interest in [Company_F], we want you to know that we value the time and effort you've invested in your application for the Data Engineer - Intern position. We have carefully reviewed your application and, while we were impressed with your experience and qualifications, we have decided to proceed with other candidates who more closely match our current needs. Due to the high number of applicants, we unfortunately can't provide any additional feedback at this time. We understand that this may be disappointing news, we would however be happy to consider you for any future opportunities that may be a better fit. If you haven't already connected with us, please do so to allow us to keep you updated on any new opportunities that will open up in the future. We wish you all the best in your job search and hope that you will keep us in mind for the future. Thank you again for your interest in [Company_F]!",
+      "position_applied": "Data Engineer - Intern"
+    },
+    {
+      "company_id": "Company_G",
+      "email_text": "Dear [Name], Thank you for your application to the Junior Project Manager role at [Company_G]. We are writing to let you know that we have reviewed your application. We regret to inform you that we shall not be progressing your application further for this particular role. We appreciate that you considered us for your next career step and hope that you maintain interest in [Company_G] and our products. If you would like to apply for other new openings we would be happy to consider you. As guidance we can consider your application for the same role once every six months, or across four separate roles in a six month period. Regards,",
+      "position_applied": "Junior Project Manager"
+    },
+    {
+      "company_id": "Company_H",
+      "email_text": "Hi [Name], Thank you again for your interest in [Company_H]. Unfortunately, we have decided not to proceed with your application for the position of Customer Services Consultant as we have decided to move forward with other candidates that we feel are a better fit. However, we were impressed with your skills and background. If you would like to apply for a different position in the future, follow us on social media and stay up to date with all new job opportunities. Good luck in your job search!",
+      "position_applied": "Customer Services Consultant"
+    },
+    {
+      "company_id": "Company_I",
+      "email_text": "Hi [Name], First of all, thank you for your interest shown in [Company_I] and the time you took to apply for the Frontend Developer position. The quality of candidates we have received for this role, including yourself, has been very high. Unfortunately, we couldn't find an immediate match based on your competency this time around. Therefore, we have chosen to proceed to the next stage with other candidates who at this moment fit the position better. Once again, we greatly appreciate your interest in [Company_I] and encourage you to keep an eye on the job listings on our career page. Further, we are proud to be a [Parent Company] brand, so don't forget to check out the vacancies at other [Parent Company] companies as well. We wish you all the best in your professional career!",
+      "position_applied": "Frontend Developer"
+    },
+    {
+      "company_id": "Company_J",
+      "email_text": "Hi [Name], First of all my apologies for not getting back sooner. As a person you have the values and personality that would fit with our organization. After several interviews, people finally agreed with me that your preference is a technical job to land in. However, this is not where your market value is. This is where you are competing with people with much stronger technical study and work experiences. So we've decided to not move forward with the recruitment process. Feel free to come back to me if you want to further discuss.",
+      "position_applied": "Technical Role"
+    },
+    {
+      "company_id": "Company_K",
+      "email_text": "Hi [Name], Thank you for your interest in our vacancy. However, all the spots of this vacancy are already filled, so we're not looking for new candidates anymore. Also, we are mostly looking for Dutch and/or French speaking candidates. Good luck with finding a job.",
+      "position_applied": "Unknown"
+    },
+    {
+      "company_id": "Company_L",
+      "email_text": "Hello, Thank you for your application to join [Company_L] as a Junior Data Engineer Trainee. Given the large number of applicants, we are forced to select more strictly on competencies and technical knowledge. We regret to inform you that we will not take you to the next step in the selection process. Thank you again for your interest in [Company_L]. We wish you the best of luck in your career search!",
+      "position_applied": "Junior Data Engineer Trainee"
+    }
+  ],
+  "feedback_rejection": [
+    {
+      "company_id": "Company_M",
+      "email_text": "Dear [Candidate], thank you for your application. We are providing some feedback as part of our learning-focused process. After reviewing your CV and interview, we were not fully convinced about your motivation for this role. Many candidates have shown more recent steps toward the required skills. This does not mean you cannot pursue similar opportunities in the future. Our general advice is to continue learning, practicing, and building a portfolio to strengthen your applications. We wish you all the best in your career journey.",
+      "position_applied": "Software Developer"
+    }
+  ],
+  "ghosted_applications": [
+    {
+      "company_id": "Company_N",
+      "email_text": null,
+      "status": "ghosted",
+      "days_since_application": 45
+    },
+    {
+      "company_id": "Company_O",
+      "email_text": null,
+      "status": "ghosted",
+      "days_since_application": 90
+    },
+    {
+      "company_id": "Company_P",
+      "email_text": null,
+      "status": "ghosted",
+      "days_since_application": 30
+    },
+    {
+      "company_id": "Company_Q",
+      "email_text": null,
+      "status": "ghosted",
+      "days_since_application": 120
+    }
+  ],
+  "metadata": {
+    "total_rejections": 12,
+    "total_feedback_rejections": 1,
+    "total_ghosted": 4,
+    "total_applications": 17,
+    "date_collected": "2024-2025",
+    "anonymization_method": "All personal identifiers removed: applicant name, company names, employee names, email addresses, external URLs",
+    "location_context": "European job market (Belgium-based applications)",
+    "data_available": {
+      "has_email_text": true,
+      "has_response_times": false,
+      "has_interview_status": false,
+      "has_position_titles": true
+    },
+    "notes": "Real rejection emails. Features like email_length, sentiment scores, empathy_words, etc. will be calculated programmatically during analysis."
+  }
+}
