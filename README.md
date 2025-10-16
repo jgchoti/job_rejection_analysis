@@ -33,7 +33,7 @@ This project is both technical (NLP feature engineering, sentiment analysis) and
 **Apology words correlate -0.45 with sentiment** (strongest negative predictor)
 
 ![Correlation Heatmap](visualizations/correlation_heatmap.png)
-_Figure 1: Correlation analysis reveals apology words are the strongest negative predictor of sentiment (-0.45), while personal pronouns drive the highest positive correlation (+0.47). Empathy words barely register (+0.15)._
+_Figure 1: Correlation analysis reveals apology words are the strongest negative predictor of sentiment (-0.39), while personal pronouns drive the highest positive correlation (+0.46). Empathy words barely register (+0.19)._
 
 Key insights:
 
