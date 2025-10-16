@@ -48,7 +48,7 @@ _Figure 1: Strong correlation between joy-based emotion words and overall sentim
 
 **What are "joy words"?**
 
-- good, luck, hope, happy, best, wish, appreciate, grateful
+- good, luck, hope, encourage, happy, appreciation, proud, organization, providing, journey
 
 ---
 
@@ -157,6 +157,9 @@ _Figure 5: Show the “impact ratio” of positive words relative to negative ap
 ---
 
 ### Finding #6: The Lexicon vs Transformer Gap
+
+![compare_models.png](visualizations/correlation_heatmap_models.png)
+_Figure 6: Correlation heatmap comparing lexicon-based models (VADER, TextBlob, AFINN) versus transformer models (RoBERTa, SST-2)._
 
 **Discovery:** Lexicon-based models (VADER, AFINN) can be fooled by polite language, while transformer models (RoBERTa) detect the underlying rejection.
 
