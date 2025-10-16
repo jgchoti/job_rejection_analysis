@@ -1,315 +1,335 @@
 # The Language of Rejection: NLP Analysis of Job Rejection Emails
 
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
-![VADER](https://img.shields.io/badge/VADER-3.3.2-green.svg)
-![TextBlob](https://img.shields.io/badge/TextBlob-0.17.1-green.svg)
+![NLP](https://img.shields.io/badge/NLP-VADER%20%7C%20RoBERTa%20%7C%20SHAP-orange)
 
-> An exploratory analysis revealing how AI sentiment models misinterpret professional rejection communication and what that tells us about the gap between algorithmic politeness detection and human empathy.
+> An exploratory analysis revealing how AI sentiment models interpret professional rejection communication - and what separates algorithmically "warm" rejections from genuinely empathetic ones.
 
 ---
 
 ## 🎯 TL;DR
 
-I analyzed real job rejection emails using sentiment analysis.
+Analyzed 13 real job rejection emails using multiple NLP approaches (lexicon-based + transformers + emotion analysis + SHAP).
 
-**Key finding:** AI scored rejections as 85-99% positive because algorithms reward verbose politeness over honest acknowledgment. The highest-scoring email used 15 personal pronouns. The most honest email (with 2 apologies) scored 0.31 while polite ones scored 0.89+. This explains why rejection emails feel "warm but empty."
+- **Joy words drive warmth**: Emails with 2+ joy words (hope, happy, good luck) → 0.95+ (warm). Emails with 0 joy words → 0.31 (cold).
 
-**Note**: This analysis is based on 13 emails as of October 2025. The dataset grows with each new application response.
+- **Negative phrases matter**: "Unfortunately… not proceed" (-0.73 combined impact) needs 5+ strong positive words to maintain warmth.
+
+- **Practical rule of thumb**: Warmth ≈ (Joy words × 2) + Positive words − (Apologies × 3)
+
+- **Lexicon vs transformer gap**: Lexicons can be fooled by polite words; transformers detect underlying rejection.
+
+⚠️ **Ongoing work**: New rejection emails will be added over time to refine and validate these patterns. Scores and insights may evolve as the dataset grows.
 
 ---
 
-## 💡 Motivation
+## 💡 Why I Did This
 
 After receiving many job rejections, I noticed patterns: some emails felt respectful, others dismissive, some never replied at all. As someone studying data science, I wondered: **could I quantify what makes rejection feel "warm" or "cold"?**
 
-This project is both technical (NLP feature engineering, sentiment analysis) and personal (processing rejection through data). It reveals fundamental limitations in how AI interprets human communication.
+This project started as personal (processing rejection through data) and evolved into technical exploration (revealing fundamental limitations in how AI interprets human communication).
 
 ---
 
-## 📊 Key Findings
+## 📊 What I Discovered
 
-### 1. The Apology Penalty ❌
+### Finding #1: Joy Words Are Everything
 
-**Apology words correlate -0.45 with sentiment** (strongest negative predictor)
+![Joy vs Sentiment](visualizations/emotion_sentiment_heatmap.png)
+_Figure 1: Strong correlation between joy-based emotion words and overall sentiment score._
 
-![Correlation Heatmap](visualizations/correlation_heatmap.png)
-_Figure 1: Correlation analysis reveals apology words are the strongest negative predictor of sentiment (-0.45), while personal pronouns drive the highest positive correlation (+0.47). Empathy words barely register (+0.15)._
+**Discovery:** Joy-based emotion (NRC lexicon) is the strongest predictor of sentiment (r = +0.65), surpassing even comprehensive positive word counts.
 
-Key insights:
+| Email Has   | Sentiment Score | Feels Like                |
+| ----------- | --------------- | ------------------------- |
+| 2 joy words | 0.95-0.99       | Genuinely warm ✅         |
+| 1 joy word  | 0.88-0.95       | Professional but standard |
+| 0 joy words | 0.31            | Cold and harsh ❌         |
 
-- **Apology words (-0.39)**: Saying "sorry" or "unfortunately" significantly lowers sentiment scores
-- **Personal pronouns (+0.46)**: Using "you" and "your" raises sentiment more than any other factor
-- **Empathy words (+0.19)**: "Thank you" and "appreciate" barely register (2.5x weaker than personalization)
-- **Both models agree**: VADER and TextBlob penalize apologies (-0.39 and -0.5 respectively)
+**What are "joy words"?**
 
-**What this means:** 1 apology = ~2.5 personal pronouns needed to maintain AI positivity. This drives the classic corporate rejection style: long, polite, but emotionally neutral.
-
----
-
-### 2. Empathy Theater 🎭
-
-**Empathy words barely correlate with sentiment** (+0.19)
-
-The data reveals a gap between what sounds empathetic and what algorithms detect:
-
-- "Thank you," "appreciate," "impressed" have minimal impact on sentiment scores
-- Personal pronouns ("you," "your") matter 2.5x more (+0.49 correlation)
-- Email length creates illusion of warmth (word count +0.42 correlation)
-- Companies increase sentiment by writing longer, not warmer
-
-**What this means:** Words that signal care to humans are noise to algorithms. Personalization metrics (pronouns, length) matter more than actual empathy expressions.
+- good, luck, hope, happy, best, wish, appreciate, grateful
 
 ---
 
-### 3. The Sentiment Paradox 📈
+### Finding #2: The Magic Number is 4
 
-**12 out of 13 rejection emails scored 0.85-1.0** (overwhelmingly positive), despite delivering bad news.
+Rejection emails need **at least 4 positive words** to feel warm.
 
-![Pairplot Distribution](visualizations/pairplot_sentiment.png)
-_Figure 2: Distribution analysis shows 12 of 13 rejection emails cluster at 0.85-1.0 sentiment (top-left histogram), with only one honest outlier at 0.31. No clear pattern exists between empathy words and sentiment scores (right-side scatter plots)._
+**What I found:**
 
-What the distribution reveals:
+- 15+ positive words → 0.99 score (top warmth)
+- 10 positive words → 0.95 score (warm)
+- 4-5 positive words → 0.88 score (okay)
+- **2 positive words → 0.31 score** (falls off a cliff!)
 
-- **Only 1 outlier at 0.31** - the most direct, honest rejection
-- **No empathy pattern** - scatter plots show empathy words don't correlate with sentiment
-- **The clustering problem** - AI interprets polite framing as positive, regardless of content
-- **Why it matters** - This explains why corporate rejections feel "warm but hollow"
-
-**The problem:** AI can't distinguish between delivering news kindly and burying bad news in positive language. Both score as "positive."
+![Positive Word Gradient](visualizations/positive_word_gradient.png)
 
 ---
 
-## 🔍 Methodology
+### Finding #3: It's About Balance
 
-### Data Collection
+**Discovery:** Using SHAP (SHapley Additive exPlanations) on transformer models reveals **why** some rejections feel warm and others don't - it's about the net balance of positive vs negative word forces.
 
-- **13 rejection emails** from real job applications (2024-2025)
-- **4 ghosted applications** (no response after 30-120 days)
-- All personally identifiable information anonymized
-- European job market context (Belgium-based applications)
+![SHAP Word Attributions](visualizations/word_importance_all.png)
+_Figure 3: Word-level importance analysis showing which words drive RoBERTa's sentiment decisions for each email._
 
-### Data Preparation
+#### **Case Study 1: Company B (+0.17) - The Tipping Point**
 
-### Analysis Pipeline
+```
+POSITIVE forces:
+  great        +0.51  ✓
+  amongst      +0.34  ✓
+  candidates   +0.16  ✓
+  best         +0.10  ✓
+  Total:       +1.11
 
-1. **Text Preprocessing**: Anonymization, normalization, cleaning
-2. **Sentiment Analysis**: VADER, TextBlob (cross-model validation)
-3. **Feature Engineering**:
-   - Linguistic features (word count, readability, pronouns)
-   - Emotional markers (empathy words, apology words)
-   - Structural patterns (mentions future, contains feedback)
-4. **Statistical Analysis**: Correlation analysis, distribution comparison, outlier detection
-5. **Visualization**: Heatmaps, scatter plots, pairplots
+NEGATIVE forces:
+  unfortunately -0.38  ✗
+  proceed      -0.35  ✗
+  not          -0.13  ✗
+  sorry        -0.08  ✗
+  Total:       -0.94
 
-### Key Features Extracted
+NET: +1.11 - 0.94 = +0.17 → Barely positive
+```
 
-```python
-# Automatically calculated from email text
-- email_length, word_count, sentence_count
-- vader_compound, textblob_polarity
-- personal_pronouns (you, your, yours)
-- empathy_words (thank, appreciate, hope, impressed, grateful, wish)
-- apology_words (sorry, unfortunately, regret, apologies, apologize)
-- mentions_future (boolean)
-- contains_feedback (boolean)
-- flesch_reading (readability score)
+**The problem:** Despite having positive words, the phrase "unfortunately, we decided not to proceed" carries massive negative weight (-0.86 combined). Positive words BARELY overcome this.
+
+**Case Study 2: Company F: Very Warm (scored 0.96)**
+
+```
+Positive words pushing UP:
+  "thank" → +0.42 points
+  "value" → +0.39 points
+  "happy" → +0.26 points
+  "impressed" → +0.18 points
+  Total positive: +1.25
+
+Negative words pushing DOWN:
+  "disappointing" → -0.17 points
+  "unfortunately" → -0.12 points
+  Total negative: -0.29
+
+NET: +1.25 - 0.29 = +0.96 → Very positive
+```
+
+**The strategy:** Floods with strong positive words (5 major ones) that OVERWHELM the weak negatives. Uses "disappointed" instead of "sorry" (less negative weight).
+
+---
+
+### Finding #4: "Future Opportunities" Doesn't Help Much
+
+**Surprising discovery:** Mentioning "future opportunities" or "keep in touch" barely affects warmth.
+
+![Future vs Gratitude](visualizations/future_vs_gratitude.png)
+_Figure 4: compares the impact of “future-oriented” words versus gratitude-related words on perceived warmth of rejection emails._
+
+**Weak words (correlation +0.10):**
+
+- "future openings"
+- "keep in touch"
+- "apply again"
+
+**Strong words (correlation +0.65):**
+
+- "thank you"
+- "appreciate"
+- "good luck"
+- "hope"
+
+**Why?** AI (and probably humans) care more about how you treat them NOW, not promises about the future.
+
+---
+
+### Finding #5: Apologies Can Be Overcome
+
+![positive_vs_apology.png](visualizations/positive_overcome.png)
+_Figure 5: Show the “impact ratio” of positive words relative to negative apology words in rejection emails."_
+
+**The data:**
+
+- Company D: 2 apologies + 2 positive words = 0.31 (disaster)
+- Company B: 2 apologies + 16 positive words = 0.99 (lexicon fooled) but only 0.17 RoBERTa (transformer sees through it)
+
+**The rule:** Each "sorry" or "unfortunately" needs about 3 positive words to cancel it out.
+
+---
+
+### Finding #6: The Lexicon vs Transformer Gap
+
+**Discovery:** Lexicon-based models (VADER, AFINN) can be fooled by polite language, while transformer models (RoBERTa) detect the underlying rejection.
+
+**The correlations:**
+
+- **Within lexicons**: VADER ↔ TextBlob (0.73), VADER ↔ AFINN (0.59)
+- **Within transformers**: RoBERTa ↔ SST-2 (0.48)
+- **Across paradigms**: VADER ↔ RoBERTa (0.38) ⚠️ weak!
+
+**Why lexicons fail:**
+
+```
+VADER logic:
+  Count: 16 positive words, 4 negative words
+  Math: 16 - 4 = +12
+  Result: 0.988 (very positive!)
+```
+
+**Why transformers succeed:**
+
+```
+RoBERTa logic:
+  Detects: "unfortunately... decided not to proceed"
+  Understands: This is a rejection phrase
+  Weights: Negative phrase > scattered positive words
+  Result: +0.17 (barely positive, closer to human perception)
+```
+
+## 🔍 How I Did This
+
+### The Data
+
+- 13 real rejection emails from my 2024-2025 job search
+- 4 applications that ghosted me (never replied)
+- All company names removed for privacy
+- Belgium-based tech/data job applications
+
+### The Analysis
+
+**Phase 1: Multi-Model Sentiment Analysis**
+
+1. **Lexicon-based**: VADER, TextBlob, AFINN
+   - Rule-based, count positive/negative words
+   - Fast, interpretable, but context-blind
+2. **Transformer-based**: RoBERTa (cardiffnlp), DistilBERT (SST-2)
+   - Context-aware, phrase understanding
+   - Slower but more nuanced
+
+**Phase 2: Feature Engineering**
+
+- Linguistic metrics: word count, sentence count, readability
+- Keyword detection: empathy words, apology words, personal pronouns
+- NRC Emotion Lexicon: joy, trust, anticipation, sadness, fear, anger
+- AFINN positive/negative word counts
+- Boolean features: mentions future, contains feedback
+
+**Phase 3: Explainability Analysis**
+
+- SHAP (SHapley Additive exPlanations) for word-level attributions
+- transformers-interpret library for RoBERTa explainability
+- Identified which exact words drive positive vs negative predictions
+
+---
+
+## 📈 The Three Types of Rejection Emails
+
+### Type 1: "The Warm One" (Score: 0.95-0.99)
+
+**Recipe:**
+
+- 2+ joy words (hope, happy, encourage)
+- 15+ positive words total
+- 10+ times saying "you" or "your"
+- Long email (800-1000 words)
+- Only 0-1 apology
+
+**Example structure:**
+_"Thank you for your interest [joy]. We appreciate your time and effort [empathy]. We were impressed with your qualifications [positive]. We hope our paths cross in the future [joy + future]. We'd be happy to consider you for other roles [positive]. Best wishes [joy]!"_
+
+**Effect:** Algorithmically warm, feels genuinely thoughtful
+
+---
+
+### Type 2: "The Standard Professional" (Score: 0.86-0.94)
+
+**Recipe:**
+
+- 1 joy word (usually just "good luck")
+- 7-10 positive words
+- Moderate length (400-600 words)
+- 1 apology
+
+**Example structure:**
+_"Thank you for applying. Unfortunately, we won't be moving forward at this time. We wish you the best of luck."_
+
+**Effect:** Feels professional but somewhat formulaic
+
+---
+
+### Type 3: "The Cold One" (Score: 0.31-0.86)
+
+**Recipe:**
+
+- 0-1 joy words (or very weak ones)
+- Only 2-4 positive words
+- 2 apologies with no compensation
+- Short (200-400 words)
+
+**Example structure:**
+_"Thanks for applying. Sorry, but you weren't selected. Unfortunately, we're going with another candidate."_
+
+**Effect:** Feels cold and dismissive, despite being polite
+
+---
+
+## 💡 What This Means
+
+### For Job Seekers (That's Me!)
+
+- **Don't take it personally** - "warmth" is often just following a template
+- **Red flag**: Email with 0 joy words and 2+ apologies = they didn't try
+- **Green flag**: 2+ joy words and personal details = they actually care
+
+### For Companies Writing Rejections
+
+**Want to make rejections feel warmer? Here's the cheat sheet:**
+
+✅ **Do this:**
+
+- Say "thank you" and "appreciate" (not just "thanks")
+- Use "hope" and "happy"
+- End with "good luck" or "best wishes"
+- Aim for 800+ characters
+- Say "you" and "your" at least 10 times
+
+❌ **Avoid this:**
+
+- Using "sorry" and "unfortunately" together (double negative!)
+- Being too brief (under 400 characters)
+- Only 1-2 positive words total
+- No joy words at all
+
+**The magic formula:**
+
+```
+Warmth = (Joy words × 2) + Positive words - (Apologies × 3)
+
+Example:
+- 2 joy words = +4
+- 10 positive words = +10
+- 1 apology = -3
+Total = +11 → Warm email!
 ```
 
 ---
 
-## 📈 Detailed Results
+## 🛠️ Technical Details
 
-### Company Strategy Comparison
+**Tools I used:**
 
-Real examples from the dataset demonstrate how language choices dramatically affect sentiment scores:
-
-| Company | Strategy            | Sentiment  | Length (chars) | Pronouns | Apologies | Key Characteristic                |
-| ------- | ------------------- | ---------- | -------------- | -------- | --------- | --------------------------------- |
-| **F**   | Highly personalized | **0.9898** | 945            | **15**   | 1         | Most pronouns = highest score     |
-| **A**   | Warm & detailed     | 0.9894     | 1023           | 13       | 1         | Second-most pronouns              |
-| **C**   | Standard polite     | 0.9739     | 897            | 10       | 1         | Long + moderate pronouns          |
-| **K**   | Brief, no apology   | 0.8860     | 265            | **2**    | **0**     | Zero apologies but low pronouns   |
-| **D**   | Honest (outlier)    | **0.3071** | 422            | 4        | **2**     | Apologies + low pronouns = lowest |
-
-**Key patterns:**
-
-1. **Top 5 companies**: All used 8-15 pronouns and scored 0.97-0.99
-2. **Bottom 3 companies**: All used 2-4 pronouns and scored below 0.89
-3. **The outlier (Company D)**: Only email with 2+ apologies, scored dramatically lower
-4. **The paradox (Company K)**: Zero apologies but still scored low due to only 2 pronouns
-
-**Insight:** Personalization (pronouns) drives sentiment more than apology avoidance. Company F with 1 apology scored 0.9898 because it had 15 pronouns. Company K with 0 apologies scored only 0.8860 because it had just 2 pronouns.
-
----
-
-### Example 1: Highest Sentiment (0.9898) - Company F
-
-**Characteristics:**
-
-- 945 characters (long, detailed)
-- **15 personal pronouns** - highest in dataset
-- 5 empathy words (thank, appreciate, etc.)
-- Only 1 apology word
-- Mentions future opportunities: Yes
-
-**Why it scored highest:**
-The algorithm detected maximum personalization through pronoun density. Every "you" and "your" signals individual attention to the model, even if the underlying message is generic. Combined with length (945 chars) and future-orientation, this created the "warmest" algorithmic reading.
-
-**The irony:** This email may or may not have been genuinely personalized but it was algorithmically optimized for sentiment scoring.
-
-**Pattern:** High pronouns + Length + Future mention + Minimal apologies = Maximum AI "warmth"
-
----
-
-### Example 2: The Outlier (0.3071) - Company D
-
-**Characteristics:**
-
-- 422 characters (medium length)
-- 4 personal pronouns (low)
-- 2 empathy words
-- **2 apology words** (tied for highest)
-- Direct acknowledgment: "We're sorry, but you haven't been selected. Unfortunately, the hiring team has decided to move forward with another candidate..."
-
-**Why it scored lowest:**
-Double penalty from the algorithm's perspective:
-
-1. **Direct acknowledgment** of disappointment through apologies ("sorry" + "unfortunately")
-2. **Lower personalization** - only 4 pronouns compared to 8-15 in high-scoring emails
-
-**The irony:** This was the most honest rejection - it acknowledged disappointment directly. The algorithm punished this honesty, scoring it 0.31 while polite-but-evasive emails scored 0.89+.
-
-**Pattern:** Honesty (apologies) + Low personalization (few pronouns) = Dramatic sentiment penalty
-
----
-
-### Example 3: The No-Apology (0.8860) - Company K
-
-**Characteristics:**
-
-- 265 characters (shortest in dataset)
-- **2 personal pronouns** (lowest in dataset)
-- 1 empathy word
-- **0 apology words** (avoided apologizing entirely)
-- Brief and factual
-
-**Why this matters:**
-Company K strategically avoided apologies but still scored relatively low (0.8860) compared to the top scorers (0.97-0.99). This proves that **avoiding apologies alone doesn't guarantee high sentiment** - you need high personalization (pronouns) and length.
-
-**The revelation:**
-
-- Company K: 0 apologies + 2 pronouns = 0.8860
-- Company F: 1 apology + 15 pronouns = 0.9898
-
-**Conclusion:** Personalization matters MORE than apology avoidance. Adding pronouns increases sentiment more than removing apologies.
-
-**Pattern:** Low pronouns = Lower sentiment, regardless of apology strategy
-
----
-
-### The Formula for High-Sentiment Rejection
-
-After analyzing the dataset, a clear pattern emerged for what makes rejection emails score as "warm" to AI.
-
-#### **What AI Detects as "Warm":**
-
-**Personal pronouns** This matters more than any other factor because algorithms interpret pronoun density as personalization, even when the content is generic.
-
-**Length creates an illusion of care.** Longer emails (800+ characters) consistently scored higher than brief ones. More words mean more opportunities for positive language, making the rejection feel more thoughtful to the algorithm.
-
-**Future-oriented language acts as optimism.** Phrases like "keep in touch" and "future opportunities" signal forward-looking positivity, boosting sentiment scores.
-
-#### **What AI Penalizes:**
-
-**Honest acknowledgment of disappointment.** Words like "sorry" and "unfortunately" are the strongest negative predictor of sentiment. The one email with 2 apology words scored dramatically lower than all others not because it was cold, but because it was honest.
-
-**The irony:** The most truthful rejection scored lowest.
-
-#### **The Surprising Paradox:**
-
-One company avoided apologies entirely but still scored relatively low because it used very few personal pronouns and was brief. Another company used an apology but scored highest because it had maximum personalization and length.
-
-**The lesson:** Personalization (or the appearance of it) matters more than avoiding apologies.
-
-#### **The Optimized Rejection Formula:**
-
-To score as "warm" to AI sentiment models:
-
-- 8-15 personal pronouns throughout ("you," "your")
-- 800-1000 characters
-- Minimize apologies (0-1 maximum)
-- Close with future-oriented language
-- Empathy words are surprisingly optional
-
-**The gap:** What algorithms detect as "warmth" (pronouns, length, optimism) isn't the same as what humans experience as empathy (acknowledgment, honesty, respect for their time).
-
----
-
-## 🛠️ Tech Stack
-
-- **Python** 3.9+
-- **NLP & Sentiment Analysis**:
-  - vaderSentiment (3.3.2) - Rule-based sentiment analysis
-  - TextBlob (0.17.1) - Pattern-based sentiment analysis
-  - NLTK - Natural language toolkit
-- **Data Processing**: Pandas, NumPy
-- **Visualization**: Matplotlib, Seaborn
-- **Statistical Analysis**: SciPy
-- **Development**: Jupyter Notebook
+- Python for all analysis
+- VADER, TextBlob, AFINN for basic sentiment
+- RoBERTa transformer model for smart AI analysis
+- NRC Emotion Lexicon for emotion detection
+- SHAP for explaining which words matter
+- Matplotlib/Seaborn for charts
 
 ---
 
 ## ⚠️ Limitations
 
-### Sample Size
+**Small sample:** Only 13 emails. This is exploratory, not definitive.
 
-- **Small dataset (13 emails)** limits statistical generalizability
-- Results should be considered exploratory and hypothesis-generating
-- Patterns observed may not hold across larger samples or different contexts
+**Paraphrased:** I rewrote emails to protect company privacy, which might have changed some details.
 
-### Scope Constraints
-
-- **Geographic**: European job market only (Belgium-based applications)
-- **Industry**: Primarily tech/analytics/data positions
-- **Language**: English language only
-- **Timeframe**: 2024-2025 (post-COVID job market)
-- **Position level**: Junior to mid-level roles
-
-### Methodological Limitations
-
-- **Sentiment models trained on general text**, not rejection-specific language
-- **No ground truth for "warmth"** - relies on algorithmic interpretation, not human ratings
-- **Self-reported data** - emails from personal experience may have selection bias
-
----
-
-## 📝 Ethical Considerations
-
-- **Privacy**: All personal identifiers removed (names, companies, employee names, email addresses)
-- **Anonymization**: Company names replaced with generic labels, content paraphrased
-- **Purpose**: Educational and research use only
-- **Consent**: Personal data from own inbox used for self-analysis
-- **Transparency**: Full methodology documented for reproducibility
-- **No harmful applications**: Results not intended for automated hiring/firing decisions
-
----
-
-## 📚 References
-
-- [VADER Sentiment Analysis](https://github.com/cjhutto/vaderSentiment)
-- [TextBlob Documentation](https://textblob.readthedocs.io/)
-- [NLTK: Natural Language Toolkit](https://www.nltk.org/)
-
----
-
-## 🌟 Acknowledgments
-
-- Thanks to all the companies that sent rejection emails (this project wouldn't exist without you)
-- The open-source NLP community for excellent tools and libraries
-- Everyone processing job rejection through creative analytical means
-
----
-
-_"The algorithm doesn’t measure emotional warmth — it measures linguistic patterns of politeness. That’s why many rejection emails sound courteous, yet still feel emotionally distant."_
-
----
+**Ongoing work**: As I continue collecting new job rejection emails, additional data will be incorporated to refine and validate these findings. Patterns may evolve with a larger sample, so insights here are subject to update.
