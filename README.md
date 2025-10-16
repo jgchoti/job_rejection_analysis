@@ -9,7 +9,7 @@
 
 ## 🎯 TL;DR
 
-Analyzed 13 real job rejection emails using multiple NLP approaches (lexicon-based + transformers + emotion analysis + SHAP).
+Analyzed job rejection emails using multiple NLP approaches (lexicon-based + transformers + emotion analysis + SHAP).
 
 - **Joy words drive warmth**: Emails with 2+ joy words (hope, happy, good luck) → 0.95+ (warm). Emails with 0 joy words → 0.31 (cold).
 
