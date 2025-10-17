@@ -94,7 +94,7 @@ NEGATIVE forces:
 NET: +1.11 - 0.94 = +0.17 → Barely positive
 ```
 
-**The problem:** Despite having positive words, the phrase "unfortunately, we decided not to proceed" carries massive negative weight (-0.86 combined). Positive words BARELY overcome this.
+**The problem:** Despite having positive words, the phrase "unfortunately, we decided not to proceed" carries massive negative weight (-0.94 combined). Positive words BARELY overcome this.
 
 **Case Study 2: Company F: Very Warm (scored 0.96)**
 
@@ -114,7 +114,7 @@ Negative words pushing DOWN:
 NET: +1.25 - 0.29 = +0.96 → Very positive
 ```
 
-**The strategy:** Floods with strong positive words (5 major ones) that OVERWHELM the weak negatives. Uses "disappointed" instead of "sorry" (less negative weight).
+**The strategy:** Floods with strong positive words (4 major ones) that OVERWHELM the weak negatives. Uses "disappointed" instead of "sorry" (less negative weight).
 
 ---
 
