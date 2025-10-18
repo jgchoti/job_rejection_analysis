@@ -205,9 +205,9 @@ NET: +2.22 (best in dataset)
 
 ✅ **DO:**
 
-- Use "appreciate" instead of generic "thank" (+315% more impact)
+- Use "appreciate" instead of generic "thank"
 - Include 2 joy words: "wish you the best" or "hope you find a great fit"
-- Follow 6:1 ratio: 6 positives per 1 apology (safe zone)
+- Follow 4:1 ratio: 4 positives per 1 apology (safe zone)
 - Be specific: "impressed by your approach to X" > "you're qualified"
 - Use "disappointed" if acknowledging outcome (-0.17 impact)
 
@@ -217,7 +217,7 @@ NET: +2.22 (best in dataset)
 - "Regret" (-0.73 impact) - worse than "sorry"
 - Multiple apologies (2+ = guaranteed cold email)
 - Generic praise without specifics
-- Emails under 50 words (feels rushed)
+- Emails under 50 words
 
 ---
 
