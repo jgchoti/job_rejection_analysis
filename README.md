@@ -19,15 +19,6 @@
 
 ⚠️ **Living project**: New rejection emails will be added over time. Findings may evolve as the dataset grows.
 
-## 📂 Project Structure
-
-- `data/`: Raw and processed rejection email data
-- `notebooks/`: Jupyter notebooks for analysis and visualization
-- `scripts/`: Python scripts for data processing
-- `visualizations/`: Charts and graphs generated from the analysis
-- `README.md`: This overview and summary of findings
-- `app.py`: interactive dashboard application
-
 ---
 
 ## 💡 Why I Did This
@@ -230,6 +221,15 @@ NET: +2.22 (best in dataset)
 ---
 
 ## 🔍 How I Did This
+
+### Project Structure
+
+- `data/`: Raw and processed rejection email data
+- `notebooks/`: Jupyter notebooks for analysis and visualization
+- `scripts/`: Python scripts for data processing
+- `visualizations/`: Charts and graphs generated from the analysis
+- `README.md`: This overview and summary of findings
+- `app.py`: interactive dashboard application
 
 ### The Data
 
