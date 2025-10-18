@@ -24,13 +24,10 @@
 
 - `data/`: Raw and processed rejection email data
 - `notebooks/`: Jupyter notebooks for analysis and visualization
+- `scripts/`: Python scripts for data processing
 - `visualizations/`: Charts and graphs generated from the analysis
 - `README.md`: This overview and summary of findings
 - `app.py`: interactive dashboard application
-- `calculate_positive_ratio.py`: Script to compute positive-to-apology word ratios
-- `compare_models.py`: Script to compare sentiment model outputs
-- `shap_analysis.py`: Script for SHAP explainability analysis
-- `final_report.md`: Detailed technical report of the analysis
 
 ---
 

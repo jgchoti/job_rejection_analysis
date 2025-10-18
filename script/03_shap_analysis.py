@@ -94,7 +94,7 @@ print("="*80)
 all_results = {}
 csv_data = []
 
-companies = ['Company_B', 'Company_A', 'Company_F', 'Company_D']
+companies = df[df['status'] != 'ghosted']['company_id'].tolist()
 
 for company in companies:
     print(f"\n{'='*80}")
@@ -172,14 +172,13 @@ print("\n" + "="*80)
 print("💾 SAVING RESULTS")
 print("="*80)
 
-with open('data/shap_results.json', 'w') as f:
+with open('data/shap_results_all.json', 'w') as f:
     json.dump(all_results, f, indent=2)
-print("✅ Saved to data/shap_results.json")
 
 # Save to CSV (flat structure for easy analysis)
 csv_df = pd.DataFrame(csv_data)
-csv_df.to_csv('data/shap_word_attributions.csv', index=False)
-print("✅ Saved to data/shap_word_attributions.csv")
+csv_df.to_csv('data/shap_word_attributions_all.csv', index=False)
+
 
 # Save summary statistics
 summary_data = []
@@ -195,10 +194,6 @@ for company, results in all_results.items():
     })
 
 summary_df = pd.DataFrame(summary_data)
-summary_df.to_csv('data/shap_summary.csv', index=False)
-print("✅ Saved to data/shap_summary.csv")
+summary_df.to_csv('data/shap_summary_all.csv', index=False)
 
-print("\nGenerated files:")
-print("  📄 data/shap_results.json          - Complete word attributions")
-print("  📄 data/shap_word_attributions.csv - Flat CSV for analysis")
-print("  📄 data/shap_summary.csv           - Summary statistics")
+

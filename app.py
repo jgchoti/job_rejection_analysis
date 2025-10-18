@@ -6,6 +6,8 @@ from plotly.subplots import make_subplots
 import json
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import re
+import numpy as np
+
 
 st.set_page_config(
     page_title="The Language of Rejection",
@@ -16,12 +18,10 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* Main background */
     .main {
         background-color: #f8f9fa;
     }
     
-    /* Headers */
     h1 {
         color: #2c3e50;
         font-weight: 700;
@@ -40,24 +40,20 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* Metric cards */
     [data-testid="stMetricValue"] {
         font-size: 2rem;
         font-weight: bold;
     }
     
-    /* Info boxes */
     .stAlert {
         border-radius: 10px;
     }
     
-    /* Sidebar */
     [data-testid="stSidebar"] {
         background-color: #ffffff;
         border-right: 2px solid #e0e0e0;
     }
     
-    /* Buttons */
     .stButton>button {
         background-color: #3498db;
         color: white;
@@ -71,7 +67,6 @@ st.markdown("""
         background-color: #2980b9;
     }
     
-    /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
     }
@@ -88,7 +83,6 @@ st.markdown("""
         color: white;
     }
     
-    /* Story sections */
     .story-section {
         background-color: white;
         padding: 25px;
@@ -97,7 +91,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
     
-    /* Quote boxes */
     .quote-box {
         background-color: #eef2f7;
         border-left: 4px solid #3498db;
@@ -107,30 +100,76 @@ st.markdown("""
         border-radius: 4px;
     }
     
-    /* Highlight */
     .highlight {
         background-color: #fff9c4;
         padding: 2px 6px;
         border-radius: 3px;
         font-weight: 600;
     }
+    
+    .danger-box {
+        background-color: #ffebee;
+        border-left: 4px solid #e74c3c;
+        padding: 15px 20px;
+        margin: 15px 0;
+        border-radius: 4px;
+    }
+    
+    .success-box {
+        background-color: #e8f5e9;
+        border-left: 4px solid #2ecc71;
+        padding: 15px 20px;
+        margin: 15px 0;
+        border-radius: 4px;
+    }
 </style>
 """, unsafe_allow_html=True)
-
 
 @st.cache_data
 def load_data():
     df = pd.read_csv('data/rejection_analysis_extended.csv')
     df_clean = df[df['status'] != 'ghosted'].copy()
     
-    with open('data/shap_results.json', 'r') as f:
+    with open('data/shap_results_all.json', 'r') as f:
         shap_data = json.load(f)
     
     return df_clean, shap_data
 
 df, shap_results = load_data()
-
 vader = SentimentIntensityAnalyzer()
+
+
+@st.cache_data
+def process_all_shap():
+    """Extract all words with their impacts across companies"""
+    all_negative = []
+    all_positive = []
+    
+    for company, data in shap_results.items():
+        for word, score in data['words']:
+            if score < 0:
+                all_negative.append({
+                    'word': word,
+                    'score': score,
+                    'company': company,
+                    'vader': data['vader'],
+                    'roberta': data['roberta']
+                })
+            else:
+                all_positive.append({
+                    'word': word,
+                    'score': score,
+                    'company': company,
+                    'vader': data['vader'],
+                    'roberta': data['roberta']
+                })
+    
+    df_neg = pd.DataFrame(all_negative)
+    df_pos = pd.DataFrame(all_positive)
+    
+    return df_neg, df_pos
+
+df_negative, df_positive = process_all_shap()
 
 
 def analyze_text(text):
@@ -159,7 +198,7 @@ def analyze_text(text):
 st.sidebar.title("💔 Navigation")
 page = st.sidebar.radio(
     "Choose a section:",
-    ["🏠 The Story", "📊 The Data", "🔬 Deep Dive", "🧪 Try It Yourself"],
+    ["🏠 The Story", "📊 The Data", "🔬 Deep Dive: SHAP", "🧪 Try It Yourself"],
     label_visibility="collapsed"
 )
 
@@ -172,7 +211,6 @@ st.sidebar.metric("The Magic Ratio", "4:1")
 st.sidebar.markdown("---")
 st.sidebar.markdown("[GitHub](https://github.com/jgchoti/job_rejection_analysis) | [LinkedIn](https://www.linkedin.com/in/chotirat/)")
 
-
 if page == "🏠 The Story":
     st.title("💔 The Language of Rejection")
     st.markdown("### What makes some rejection emails feel warm while others feel crushing?")
@@ -184,12 +222,12 @@ if page == "🏠 The Story":
     <div class="story-section">
     <h2>📖 How This Started</h2>
     <p style="font-size: 1.1rem; line-height: 1.8;">
-    After receiving too many job rejection, something clicked. Instead of feeling frustrated, 
+    After receiving my 14th job rejection, something clicked. Instead of feeling frustrated, 
     I got curious: <b>could I quantify what makes a rejection feel "warm" or "cold"?</b>
     </p>
     <p style="font-size: 1.1rem; line-height: 1.8;">
-    I collected all rejection emails, anonymized them, and analyzed them using 
-    Natural Language Processing(NLP).
+    I collected all 14 rejection emails, anonymized them, and analyzed them using 
+    Natural Language Processing. What I found surprised me.
     </p>
     </div>
     """, unsafe_allow_html=True)
@@ -233,7 +271,7 @@ if page == "🏠 The Story":
     
     st.markdown("""
     <div class="quote-box">
-    <b>The difference?</b> 68 words more. 
+    <b>The difference?</b> 68 words.
     Completely different emotional impact.
     </div>
     """, unsafe_allow_html=True)
@@ -276,7 +314,7 @@ if page == "🏠 The Story":
     with finding_col3:
         st.markdown("""
         <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%;">
-        <h3 style="color: #9b59b6; margin-top: 0;">🧪 Finding #3</h3>
+        <h3 style="color: #9b59b6; margin-top: 0;">🤖 Finding #3</h3>
         <h4>Context Matters</h4>
         <p style="font-size: 0.95rem; line-height: 1.6;">
         Transformers detect <b>hollow politeness</b> that simple word-counting misses.
@@ -294,26 +332,23 @@ if page == "🏠 The Story":
     <div class="story-section">
     <h2>💡 Why This Matters</h2>
     <div style="font-size: 1.05rem; line-height: 1.8;">
-
-    <p><b>🔍 For job seekers:</b> That sinking feeling after a cold rejection? 
-    It's rarely personal. Often, it's just a poorly worded template. Some companies unintentionally discourage candidates, while others leave a positive impression. Recognizing the patterns helps us navigate rejections with less stress.</p>
-
-    <p><b>🏣 For recruiters:</b> Saying "no" can still be kind. Thoughtful templates, small personalized touches, or empathetic phrasing can significantly improve candidate experience. As AI-generated communications become standard, these small design choices will define company reputation and candidate satisfaction.</p>
-
-    <p><b>🔮 Looking ahead:</b> In the future, AI may read rejection emails before humans, or even ranking or analyzing candidate responses. A “warm” message won't just feel better to the recipient; it could affect how automated systems evaluate engagement, sentiment, and candidate follow-up. Crafting messages with warmth and clarity becomes a strategic move for both human experience and AI-driven workflows.</p>
-
-    <p style="margin-bottom: 0;"><b>✨ The bigger point:</b> Rejection is unavoidable in hiring but unnecessary cruelty is optional.</p>
-
+    <p><b>For job seekers like me:</b> That sinking feeling after a cold rejection? 
+    It's not personal. It's just a bad template. Some companies accidentally crush spirits. 
+    Others lift them. Neither is intentional.</p>
+    
+    <p><b>For recruiters:</b> You can say "no" and still make someone's day better. 
+    Small template improvements create measurably better candidate experiences. 
+    Same automation. Different outcomes.</p>
+    
+    <p style="margin-bottom: 0;"><b>The bigger point:</b> Rejection is unavoidable in hiring. 
+    Cruelty is optional.</p>
     </div>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("👉 **Explore the data in the next section to see exactly how I measured this.**")
+    st.markdown("👉 **Explore the data in the next section to see exactly how we measured this.**")
 
-# ============================================
-# PAGE 2: THE DATA
-# ============================================
 elif page == "📊 The Data":
     st.title("📊 The Data Behind the Story")
     st.markdown("### Let's look at the numbers that prove these patterns are real")
@@ -537,108 +572,504 @@ elif page == "📊 The Data":
     summary_df = summary_df.round(3)
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
-# ============================================
-# PAGE 3: DEEP DIVE
-# ============================================
-elif page == "🔬 Deep Dive":
-    st.title("🔬 Deep Dive: SHAP Analysis")
-    st.markdown("### Which specific words push sentiment up or down?")
+
+elif page == "🔬 Deep Dive: SHAP":
+    st.title("🔬 Deep Dive: SHAP Word Analysis")
+    st.markdown("### Which specific words push sentiment up or down? Let's find out.")
     
     st.markdown("""
-    SHAP (SHapley Additive exPlanations) reveals the **exact contribution** of each word 
-    to the RoBERTa transformer's sentiment decision. This shows us WHY some emails feel warm or cold.
+    **SHAP (SHapley Additive exPlanations)** reveals the exact contribution of each word 
+    to RoBERTa's sentiment decision. This is where we find the **real insights** - 
+    which words companies should use, and which they should avoid.
     """)
     
     st.markdown("---")
     
-    # Company selector
-    companies = sorted(shap_results.keys())
-    selected_company = st.selectbox(
-        "Select a company to analyze:",
-        companies,
-        format_func=lambda x: f"{x} (VADER: {shap_results[x]['vader']:.3f}, RoBERTa: {shap_results[x]['roberta']:.3f})"
-    )
+    # Tab structure for different views
+    shap_tab1, shap_tab2, shap_tab3, shap_tab4 = st.tabs([
+        "☠️ Words to Avoid",
+        "⭐ Words to Use", 
+        "🔄 Substitution Guide",
+        "📚 Case Studies"
+    ])
     
-    if selected_company:
-        data = shap_results[selected_company]
-        words = data['words']
+
+    with shap_tab1:
+        st.markdown("## ☠️ The Most Damaging Words")
+        st.markdown("These words carry the most negative weight across all emails:")
         
-        # Get top words
-        words_sorted = sorted(words, key=lambda x: x[1], reverse=True)
-        top_positive = [w for w in words_sorted if w[1] > 0][:10]
-        top_negative = sorted([w for w in words if w[1] < 0], key=lambda x: x[1])[:10]
+        # Get top 15 most negative
+        top_negative = df_negative.nsmallest(15, 'score')
         
-        combined = top_positive + top_negative
-        combined.sort(key=lambda x: x[1])
-        
-        words_list = [w[0] for w in combined]
-        scores = [w[1] for w in combined]
-        colors = ['#2ecc71' if s > 0 else '#e74c3c' for s in scores]
-        
-        # Create visualization
-        fig = go.Figure(data=[
+        fig_neg = go.Figure(data=[
             go.Bar(
-                y=words_list,
-                x=scores,
+                x=top_negative['score'],
+                y=[f"{row['word']} ({row['company']})" for _, row in top_negative.iterrows()],
                 orientation='h',
-                marker_color=colors,
-                text=[f"{s:+.3f}" for s in scores],
-                textposition='outside'
+                marker_color='#e74c3c',
+                text=[f"{score:.3f}" for score in top_negative['score']],
+                textposition='outside',
+                hovertemplate='<b>%{y}</b><br>Impact: %{x:.3f}<extra></extra>'
             )
         ])
         
-        fig.update_layout(
-            title=f"{selected_company}: Word-Level Impact on Sentiment",
-            xaxis_title="SHAP Value (Impact on Sentiment)",
-            yaxis_title="Word",
+        fig_neg.update_layout(
+            title="Top 15 Most Damaging Words (Across All Companies)",
+            xaxis_title="SHAP Value (Negative Impact)",
+            yaxis_title="Word (Company)",
             template='plotly_white',
             height=600,
             showlegend=False
         )
         
-        fig.add_vline(x=0, line_width=2, line_color="gray", line_dash="solid")
+        st.plotly_chart(fig_neg, use_container_width=True)
         
-        st.plotly_chart(fig, use_container_width=True)
+        # Insights
+        st.markdown("### 💡 Key Insights")
         
-        # Summary
-        total_positive = sum([s for s in scores if s > 0])
-        total_negative = sum([s for s in scores if s < 0])
-        net = total_positive + total_negative
-        gap = abs(data['vader'] - data['roberta'])
+        col1, col2 = st.columns(2)
         
-        col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric("Positive Force", f"+{total_positive:.3f}")
+            st.markdown("""
+            <div class="danger-box">
+            <h4>🚨 The "Unfortunately" Disaster</h4>
+            <p><b>Company_C: -0.7727</b> (worst word in dataset!)</p>
+            <p>This single word crushes sentiment. VADER thinks the email is positive (0.974), 
+            but RoBERTa knows it's negative (-0.168) because transformers have learned 
+            "unfortunately" is a rejection pattern.</p>
+            <p style="margin-bottom: 0;"><b>Impact:</b> Using "unfortunately" creates a 1.14 point 
+            disagreement between lexicons and transformers.</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
         with col2:
-            st.metric("Negative Force", f"{total_negative:.3f}")
-        with col3:
-            st.metric("Net Impact", f"{net:+.3f}")
-        with col4:
-            st.metric("VADER-RoBERTa Gap", f"{gap:.3f}")
+            st.markdown("""
+            <div class="danger-box">
+            <h4>💀 The "Regret" Problem</h4>
+            <p><b>Company_G: -0.7341</b> (second-worst!)</p>
+            <p>"Regret" sounds polite, but it's actually <b>worse than "sorry"</b> (-0.47) 
+            because it's strongly associated with formal rejections.</p>
+            <p style="margin-bottom: 0;"><b>Advice:</b> Never use "regret" in rejection emails. 
+            It's a learned rejection signal.</p>
+            </div>
+            """, unsafe_allow_html=True)
         
-        # Explanation
-        st.markdown("### 💡 What This Means")
+        # Summary statistics
+        st.markdown("### 📊 Word Frequency Analysis")
         
-        if gap > 0.5:
-            st.warning(f"""
-            **Large Disagreement ({gap:.3f}):** VADER and RoBERTa strongly disagree. 
-            VADER scored this **{data['vader']:.3f}** ({"very positive" if data['vader'] > 0.8 else "positive"}) 
-            while RoBERTa scored **{data['roberta']:.3f}** ({"negative" if data['roberta'] < 0 else "barely positive"}).
-            
-            **Why?** VADER counts positive words. RoBERTa understands that rejection phrases 
-            like "unfortunately...not proceed" carry more negative weight than scattered positive words.
-            """)
-        else:
-            st.success(f"""
-            **Agreement ({gap:.3f}):** VADER and RoBERTa mostly agree. 
-            Both scored this email as {"warm" if data['vader'] > 0.85 else "cold" if data['vader'] < 0.5 else "neutral"}.
-            
-            The balance of positive and negative words is clear enough that even simple word counting works well.
-            """)
+        # Count how many times each negative word appears
+        neg_word_counts = df_negative.groupby('word').agg({
+            'score': ['mean', 'count', 'min']
+        }).round(3)
+        neg_word_counts.columns = ['avg_impact', 'frequency', 'worst_impact']
+        neg_word_counts = neg_word_counts.sort_values('avg_impact').head(10)
+        
+        st.dataframe(
+            neg_word_counts.reset_index().rename(columns={
+                'word': 'Word',
+                'avg_impact': 'Average Impact',
+                'frequency': 'Appears in # Emails',
+                'worst_impact': 'Worst Single Impact'
+            }),
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        st.warning("""
+        **Bottom Line:** 
+        - "Unfortunately" appears in 8 emails with average impact -0.47
+        - "Sorry" appears in 4 emails with average impact -0.29
+        - "Regret" appears in 2 emails but has devastating impact (-0.66 average)
+        
+        **Recommendation:** Avoid all three. If you must acknowledge disappointment, use "disappointing" (-0.17) instead.
+        """)
+    
 
-# ============================================
-# PAGE 4: TRY IT YOURSELF
-# ============================================
+    with shap_tab2:
+        st.markdown("## ⭐ The Most Helpful Words")
+        st.markdown("These words consistently boost warmth:")
+        
+        # Get top 15 most positive
+        top_positive = df_positive.nlargest(15, 'score')
+        
+        fig_pos = go.Figure(data=[
+            go.Bar(
+                x=top_positive['score'],
+                y=[f"{row['word']} ({row['company']})" for _, row in top_positive.iterrows()],
+                orientation='h',
+                marker_color='#2ecc71',
+                text=[f"+{score:.3f}" for score in top_positive['score']],
+                textposition='outside',
+                hovertemplate='<b>%{y}</b><br>Impact: %{x:.3f}<extra></extra>'
+            )
+        ])
+        
+        fig_pos.update_layout(
+            title="Top 15 Most Helpful Words (Across All Companies)",
+            xaxis_title="SHAP Value (Positive Impact)",
+            yaxis_title="Word (Company)",
+            template='plotly_white',
+            height=600,
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig_pos, use_container_width=True)
+        
+        # Insights
+        st.markdown("### 💡 The Power Trio")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("""
+            <div class="success-box">
+            <h4>🏆 #1: "Appreciate"</h4>
+            <p><b>Average Impact: +0.52</b></p>
+            <p>Appears in 5 emails with consistently strong positive impact.</p>
+            <p><b>Best Use:</b> Company_M (+0.59)</p>
+            <p style="margin-bottom: 0;"><i>"We appreciate your interest..."</i></p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+            <div class="success-box">
+            <h4>🥈 #2: "Thank"</h4>
+            <p><b>Average Impact: +0.47</b></p>
+            <p>Most frequent positive word. Appears in 10+ emails.</p>
+            <p><b>Best Use:</b> Company_E (+0.56)</p>
+            <p style="margin-bottom: 0;"><i>"Thank you for your time..."</i></p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown("""
+            <div class="success-box">
+            <h4>🥉 #3: "Value"</h4>
+            <p><b>Average Impact: +0.39</b></p>
+            <p>Rare but powerful. Shows genuine appreciation.</p>
+            <p><b>Best Use:</b> Company_F (+0.39)</p>
+            <p style="margin-bottom: 0;"><i>"We value your effort..."</i></p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Word frequency
+        st.markdown("### 📊 Positive Word Frequency")
+        
+        pos_word_counts = df_positive.groupby('word').agg({
+            'score': ['mean', 'count', 'max']
+        }).round(3)
+        pos_word_counts.columns = ['avg_impact', 'frequency', 'best_impact']
+        pos_word_counts = pos_word_counts.sort_values('avg_impact', ascending=False).head(10)
+        
+        st.dataframe(
+            pos_word_counts.reset_index().rename(columns={
+                'word': 'Word',
+                'avg_impact': 'Average Impact',
+                'frequency': 'Appears in # Emails',
+                'best_impact': 'Best Single Impact'
+            }),
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        st.success("""
+        **Action Items:**
+        - Use "appreciate" instead of just "thank" for stronger impact
+        - Include "value" when you mean it (don't overuse)
+        - "Impressed" (+0.51 peak) is powerful when specific
+        - "Happy" and "wish" are joy words that boost warmth significantly
+        """)
+    
+
+    with shap_tab3:
+        st.markdown("## 🔄 Word Substitution Guide")
+        st.markdown("### Simple swaps that make emails warmer:")
+        
+        # Create substitution table
+        substitutions = [
+            {
+                'avoid': 'Sorry',
+                'avoid_impact': -0.47,
+                'use': 'Disappointed',
+                'use_impact': -0.17,
+                'improvement': '+64%',
+                'example': 'We\'re disappointed we can\'t move forward'
+            },
+            {
+                'avoid': 'Regret',
+                'avoid_impact': -0.73,
+                'use': 'Disappointing',
+                'use_impact': -0.17,
+                'improvement': '+77%',
+                'example': 'This is disappointing news to share'
+            },
+            {
+                'avoid': 'Unfortunately',
+                'avoid_impact': -0.77,
+                'use': '(Skip it!)',
+                'use_impact': 0.0,
+                'improvement': '+100%',
+                'example': 'We\'ve decided to move forward with another candidate'
+            },
+            {
+                'avoid': 'Thanks (generic)',
+                'avoid_impact': -0.16,
+                'use': 'Thank you + specific',
+                'use_impact': +0.42,
+                'improvement': '+163%',
+                'example': 'Thank you for your thoughtful approach to the case study'
+            },
+            {
+                'avoid': 'Thank (alone)',
+                'avoid_impact': +0.13,
+                'use': 'Appreciate',
+                'use_impact': +0.54,
+                'improvement': '+315%',
+                'example': 'We appreciate your interest in our team'
+            },
+            {
+                'avoid': 'Good luck',
+                'avoid_impact': +0.12,
+                'use': 'Wish you the best',
+                'use_impact': +0.23,
+                'improvement': '+92%',
+                'example': 'We wish you the best in your job search'
+            }
+        ]
+        
+        df_sub = pd.DataFrame(substitutions)
+        
+        # Display as formatted table
+        st.markdown("### 🔄 Recommended Substitutions")
+        
+        for _, row in df_sub.iterrows():
+            col1, col2, col3 = st.columns([1, 1, 2])
+            
+            with col1:
+                st.markdown(f"""
+                <div style="background-color: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
+                <h4 style="color: #c62828; margin: 0;">❌ Avoid</h4>
+                <p style="font-size: 1.2rem; font-weight: bold; margin: 10px 0;">{row['avoid']}</p>
+                <p style="margin: 0; color: #666;">Impact: {row['avoid_impact']:.2f}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                use_color = "#e8f5e9" if row['use_impact'] >= 0 else "#fff3e0"
+                text_color = "#2e7d32" if row['use_impact'] >= 0 else "#f57c00"
+                st.markdown(f"""
+                <div style="background-color: {use_color}; padding: 15px; border-radius: 8px; text-align: center;">
+                <h4 style="color: {text_color}; margin: 0;">✅ Use</h4>
+                <p style="font-size: 1.2rem; font-weight: bold; margin: 10px 0;">{row['use']}</p>
+                <p style="margin: 0; color: #666;">Impact: {row['use_impact']:+.2f}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown(f"""
+                <div style="background-color: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+                <p style="margin: 0; color: #666;"><b>Improvement:</b> {row['improvement']}</p>
+                <p style="margin: 5px 0 0 0; font-style: italic;">"{row['example']}"</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Key takeaways
+        st.info("""
+        **💡 Key Takeaway:** Small word changes create massive improvements:
+        - Dropping "unfortunately" entirely = +100% better
+        - Swapping "sorry" for "disappointed" = +64% better  
+        - Using "appreciate" instead of "thank" = +315% better
+        
+        These are ONE-TIME template fixes that improve every rejection forever.
+        """)
+
+    with shap_tab4:
+        st.markdown("## 📚 Case Studies: Winners & Losers")
+        st.markdown("### Let's examine why certain companies succeeded or failed:")
+        
+        # Case Study 1: Company F (Winner)
+        st.markdown("### 🏆 Case Study #1: Company F - The Winner (0.990)")
+        
+        company_f = shap_results['Company_F']
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            <div class="success-box">
+            <h4>✅ What They Did Right</h4>
+            <ul>
+                <li><b>Strong positives:</b> Used powerful words like "appreciate" (+0.54), "value" (+0.39), "happy" (+0.26)</li>
+                <li><b>Smart apology choice:</b> Used "disappointing" (-0.17) instead of "sorry" (-0.47)</li>
+                <li><b>Joy words:</b> Included "wish" and "best"</li>
+                <li><b>No "unfortunately":</b> Avoided the worst word</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.metric("Positive Force", f"+{company_f['words'][0][1] + company_f['words'][1][1]:.2f}")
+            st.metric("Negative Force", f"{company_f['words'][-1][1] + company_f['words'][-2][1]:.2f}")
+        
+        with col2:
+            # SHAP for Company F
+            words_f = company_f['words']
+            top_pos_f = sorted([w for w in words_f if w[1] > 0], key=lambda x: x[1], reverse=True)[:7]
+            top_neg_f = sorted([w for w in words_f if w[1] < 0], key=lambda x: x[1])[:3]
+            
+            combined_f = top_pos_f + top_neg_f
+            combined_f.sort(key=lambda x: x[1])
+            
+            fig_f = go.Figure(data=[
+                go.Bar(
+                    y=[w[0] for w in combined_f],
+                    x=[w[1] for w in combined_f],
+                    orientation='h',
+                    marker_color=['#2ecc71' if w[1] > 0 else '#e74c3c' for w in combined_f],
+                    text=[f"{w[1]:+.2f}" for w in combined_f],
+                    textposition='outside'
+                )
+            ])
+            
+            fig_f.update_layout(
+                title="Company F: Word Impact",
+                xaxis_title="SHAP Value",
+                template='plotly_white',
+                height=400,
+                showlegend=False
+            )
+            
+            st.plotly_chart(fig_f, use_container_width=True)
+        
+        st.success(f"""
+        **Result:** 
+        - VADER: {company_f['vader']:.3f} (very warm)
+        - RoBERTa: {company_f['roberta']:.3f} (very warm)
+        - **Gap: {abs(company_f['vader'] - company_f['roberta']):.3f}** (both models agree!)
+        
+        **The strategy worked:** Positive flooding + smart apology choice + joy words = warmest email in dataset.
+        """)
+        
+        st.markdown("---")
+        
+        # Case Study 2: Company C (Loser)
+        st.markdown("### 💔 Case Study #2: Company C - The Disagreement (VADER 0.974, RoBERTa -0.168)")
+        
+        company_c = shap_results['Company_C']
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            <div class="danger-box">
+            <h4>❌ What Went Wrong</h4>
+            <ul>
+                <li><b>The killer word:</b> "Unfortunately" with -0.7727 impact (worst in dataset!)</li>
+                <li><b>Weak positives:</b> Generic words like "thanks" and "good"</li>
+                <li><b>No compensation:</b> Not enough strong positives to balance apology</li>
+                <li><b>VADER fooled:</b> Counted positive words, missed rejection context</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.metric("Positive Force", f"+{sum([w[1] for w in company_c['words'] if w[1] > 0]):.2f}")
+            st.metric("Negative Force", f"{sum([w[1] for w in company_c['words'] if w[1] < 0]):.2f}")
+        
+        with col2:
+            # SHAP for Company C
+            words_c = company_c['words']
+            top_pos_c = sorted([w for w in words_c if w[1] > 0], key=lambda x: x[1], reverse=True)[:5]
+            top_neg_c = sorted([w for w in words_c if w[1] < 0], key=lambda x: x[1])[:5]
+            
+            combined_c = top_pos_c + top_neg_c
+            combined_c.sort(key=lambda x: x[1])
+            
+            fig_c = go.Figure(data=[
+                go.Bar(
+                    y=[w[0] for w in combined_c],
+                    x=[w[1] for w in combined_c],
+                    orientation='h',
+                    marker_color=['#2ecc71' if w[1] > 0 else '#e74c3c' for w in combined_c],
+                    text=[f"{w[1]:+.2f}" for w in combined_c],
+                    textposition='outside'
+                )
+            ])
+            
+            fig_c.update_layout(
+                title="Company C: Word Impact",
+                xaxis_title="SHAP Value",
+                template='plotly_white',
+                height=400,
+                showlegend=False
+            )
+            
+            st.plotly_chart(fig_c, use_container_width=True)
+        
+        st.error(f"""
+        **Result:**
+        - VADER: {company_c['vader']:.3f} (thinks it's warm!)
+        - RoBERTa: {company_c['roberta']:.3f} (knows it's cold!)
+        - **Gap: {abs(company_c['vader'] - company_c['roberta']):.3f}** (BIGGEST disagreement in dataset!)
+        
+        **The lesson:** One terrible word ("unfortunately" -0.77) can destroy an entire email. 
+        Transformers learned this is a rejection pattern, while lexicons just count words.
+        """)
+        
+        st.markdown("---")
+        
+        # Comparison table
+        st.markdown("### 📊 Winner vs Loser Comparison")
+        
+        comparison = pd.DataFrame({
+            'Metric': [
+                'VADER Score',
+                'RoBERTa Score',
+                'Model Agreement',
+                'Positive Word Sum',
+                'Negative Word Sum',
+                'Net Impact',
+                'Joy Words Used',
+                'Worst Word Impact',
+                'Best Word Impact'
+            ],
+            'Company F (Winner)': [
+                f"{company_f['vader']:.3f}",
+                f"{company_f['roberta']:.3f}",
+                f"{abs(company_f['vader'] - company_f['roberta']):.3f} ✅",
+                "+2.67 🏆",
+                "-0.45 ✅",
+                "+2.22 🏆",
+                "2 (wish, best)",
+                "-0.17 (disappointing)",
+                "+0.42 (thank)"
+            ],
+            'Company C (Loser)': [
+                f"{company_c['vader']:.3f}",
+                f"{company_c['roberta']:.3f}",
+                f"{abs(company_c['vader'] - company_c['roberta']):.3f} ❌",
+                "+1.03",
+                "-1.59 ❌",
+                "-0.56 ❌",
+                "1 (good)",
+                "-0.77 (unfortunately) ☠️",
+                "+0.18 (thanks)"
+            ]
+        })
+        
+        st.dataframe(comparison, use_container_width=True, hide_index=True)
+        
+        st.markdown("""
+        **The Contrast:**
+        - **Positive sum:** Winner has 2.6× more positive force
+        - **Negative sum:** Winner has 72% less negative force
+        - **Net impact:** Winner is +2.78 points better
+        - **Model agreement:** Winner has models aligned, loser has 1.14 gap
+        
+        **Bottom line:** Company F's template is objectively, measurably better.
+        """)
+
 else:  # Try It Yourself
     st.title("🧪 Try It Yourself")
     st.markdown("### Analyze your own rejection email or create a better template")
@@ -652,8 +1083,7 @@ else:  # Try It Yourself
         # Example selector
         example = st.selectbox(
             "Or try an example:",
-            ["", "❌ Cold Email", "😐 Generic Email", "✅ Warm Email"],
-            label_visibility="collapsed"
+            ["", "❌ Cold Email", "😐 Generic Email", "✅ Warm Email"]
         )
         
         example_texts = {
@@ -761,6 +1191,7 @@ Warm regards,
                     - Adding joy words like "wish you the best"
                     - Increasing positive words to 6+
                     - Following the 4:1 rule (4 positives per apology)
+                    - Avoiding "unfortunately" and "regret"
                     """)
     
     with tab2:
@@ -783,26 +1214,40 @@ Warm regards,
                 improved = rewrite_input
                 suggestions = []
                 
+                # Remove "unfortunately"
+                if 'unfortunately' in improved.lower():
+                    improved = re.sub(r'\b[Uu]nfortunately,?\s*', '', improved)
+                    suggestions.append("✅ Removed 'unfortunately' (saves up to -0.77 negative impact!)")
+                
+                # Replace "sorry" with "disappointed"
+                if 'sorry' in improved.lower():
+                    improved = re.sub(r"\bsorry\b", "disappointed", improved, flags=re.IGNORECASE)
+                    suggestions.append("✅ Changed 'sorry' to 'disappointed' (+64% less negative)")
+                
+                # Replace "regret" with "disappointing"
+                if 'regret' in improved.lower():
+                    improved = re.sub(r"\bregret\b", "find it disappointing", improved, flags=re.IGNORECASE)
+                    suggestions.append("✅ Changed 'regret' to 'disappointing' (+77% less negative)")
+                
                 # Add joy words
                 if original['joy'] == 0 and 'wish you' not in improved.lower():
                     improved += "\n\nWe wish you the best in your job search!"
-                    suggestions.append("✅ Added joy words to closing")
+                    suggestions.append("✅ Added joy words to closing (+0.23 impact)")
                 
                 # Add specific positive
-                if original['positive'] < 4 and 'impressed' not in improved.lower():
+                if original['positive'] < 4 and 'impressed' not in improved.lower() and 'appreciate' not in improved.lower():
                     lines = improved.split('\n')
                     for i, line in enumerate(lines):
                         if any(word in line.lower() for word in ['dear', 'hi ', 'hello']):
-                            lines.insert(i+1, "\nWe were impressed by your background and the time you invested in your application.\n")
+                            lines.insert(i+1, "\nWe appreciate the time you invested in your application and were impressed by your background.\n")
                             break
                     improved = '\n'.join(lines)
-                    suggestions.append("✅ Added specific positive feedback")
+                    suggestions.append("✅ Added 'appreciate' and 'impressed' (+1.05 combined impact)")
                 
-                # Remove excess apologies
-                if original['apology'] > 1:
-                    improved = re.sub(r',\s*unfortunately\b', '', improved, flags=re.IGNORECASE)
-                    improved = re.sub(r'\bUnfortunately,\s*', '', improved, flags=re.IGNORECASE)
-                    suggestions.append("✅ Removed excess apologies")
+                # Enhance "thank" to "appreciate"
+                if improved.count('thank') > 0 and 'appreciate' not in improved.lower():
+                    improved = improved.replace('Thank you', 'We appreciate your', 1)
+                    suggestions.append("✅ Enhanced 'thank' to 'appreciate' (+300% more impact)")
                 
                 improved_analysis = analyze_text(improved)
                 
@@ -836,9 +1281,21 @@ Warm regards,
                 with col2:
                     st.markdown("**Improved:**")
                     st.text_area("", value=improved, height=300, disabled=True, label_visibility="collapsed")
+                
+                # Show the math
+                if suggestions:
+                    st.info(f"""
+                    **💡 Why This Works:**
+                    
+                    Based on SHAP analysis of 14 real emails:
+                    - Removing "unfortunately" = up to +0.77 improvement
+                    - Swapping "sorry" for "disappointed" = +0.30 improvement
+                    - Adding "appreciate" instead of "thank" = +0.40 improvement
+                    - Adding joy words = +0.20+ improvement
+                    
+                    **Total potential improvement: {change:+.2f} points!**
+                    """)
 
-# ============================================
-# RUN
-# ============================================
+# Run
 if __name__ == "__main__":
     pass
