@@ -13,7 +13,7 @@ with open('data/email.json', 'r') as f:
 vader = SentimentIntensityAnalyzer()
 afinn = Afinn()
 
-# Manual keywords (for interpretable features)
+# Manual keywords 
 empathy_keywords = ['thank', 'appreciate', 'grateful', 'hope', 'wish', 'impressed']
 apology_keywords = ['sorry', 'apologies', 'apologize', 'unfortunately', 'regret', 'regrettably']
 future_keywords = ['future', 'again', 'next', 'keep in touch', 'stay connected', 'opportunities']
@@ -28,9 +28,9 @@ def extract_features(text):
             'sentence_count': 0,
             'vader_compound': None,
             'textblob_polarity': None,
-            'afinn_score': 0,  # NEW: AFINN total score
-            'afinn_positive_count': 0,  # NEW: Count of positive words
-            'afinn_negative_count': 0,  # NEW: Count of negative words
+            'afinn_score': 0,  
+            'afinn_positive_count': 0,  
+            'afinn_negative_count': 0, 
             'empathy_words': 0,
             'apology_words': 0,
             'personal_pronouns': 0,
@@ -42,7 +42,6 @@ def extract_features(text):
         }
     
     text_lower = text.lower()
-    # Clean tokenization - remove punctuation
     words = re.findall(r'\b[a-z]+\b', text_lower)
     word_count = len(words)
     
@@ -63,7 +62,7 @@ def extract_features(text):
         elif score < 0:
             afinn_neg_count += 1
     
-    # Manual keyword counts (for interpretability)
+    # Manual keyword counts 
     empathy_count = sum(1 for word in words if word in empathy_keywords)
     apology_count = sum(1 for word in words if word in apology_keywords)
     pronoun_count = sum(1 for word in words if word in personal_pronouns)

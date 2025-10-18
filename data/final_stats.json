@@ -1,0 +1,56 @@
+{
+  "dataset": {
+    "total_emails": 14,
+    "ghosted": 4,
+    "companies": [
+      "Company_A",
+      "Company_B",
+      "Company_C",
+      "Company_D",
+      "Company_E",
+      "Company_F",
+      "Company_G",
+      "Company_H",
+      "Company_I",
+      "Company_J",
+      "Company_K",
+      "Company_L",
+      "Company_M",
+      "Company_N"
+    ]
+  },
+  "correlations": {
+    "joy_vader": 0.6046397891519546,
+    "positive_words_vader": 0.5970087580154643,
+    "vader_roberta": 0.39560786372634843,
+    "roberta_sst2": 0.514786720599354
+  },
+  "ratio_rule": {
+    "calculated_ratio": 6.2,
+    "recommended_ratio": 6.0,
+    "minimum_threshold": 4.0,
+    "average_successful": Infinity
+  },
+  "key_findings": {
+    "joy_is_strongest": true,
+    "joy_correlation": 0.605,
+    "positive_word_threshold": 4,
+    "apology_compensation_ratio": 6
+  },
+  "model_disagreements": {
+    "top_3": [
+      {
+        "company": "Company_C",
+        "gap": 1.14
+      },
+      {
+        "company": "Company_J",
+        "gap": 1.13
+      },
+      {
+        "company": "Company_L",
+        "gap": 1.11
+      }
+    ]
+  }
+}

@@ -59,36 +59,41 @@
       "company_id": "Company_L",
       "email_text": "Hello, Thank you for your application to join [Company_L] as a Junior Data Engineer Trainee. Given the large number of applicants, we are forced to select more strictly on competencies and technical knowledge. We regret to inform you that we will not take you to the next step in the selection process. Thank you again for your interest in [Company_L]. We wish you the best of luck in your career search!",
       "position_applied": "Junior Data Engineer Trainee"
+    },
+    {
+      "company_id": "Company_M",
+      "email_text": "Dear [Candidate], Thank you very much for the time, effort, and interest you have shown in applying for the position of Junior Web developer at [Company_M]. We appreciate the energy and care that goes into each application. After reviewing a very large number of candidates, we have now completed the recruitment process and selected a candidate for the role. Due to the exceptionally high volume of applications, we’re unfortunately unable to respond to individual questions or provide personal feedback, regardless of the stage reached in the process. We sincerely value your interest in joining our team and encourage you to keep an eye on our job board for future opportunities that may match your skills and ambitions.",
+      "position_applied": "Junior Web developer"
     }
   ],
   "feedback_rejection": [
     {
-      "company_id": "Company_M",
+      "company_id": "Company_N",
       "email_text": "Dear [Candidate], thank you for your application. We are providing some feedback as part of our learning-focused process. After reviewing your CV and interview, we were not fully convinced about your motivation for this role. Many candidates have shown more recent steps toward the required skills. This does not mean you cannot pursue similar opportunities in the future. Our general advice is to continue learning, practicing, and building a portfolio to strengthen your applications. We wish you all the best in your career journey.",
       "position_applied": "Software Developer"
     }
   ],
   "ghosted_applications": [
     {
-      "company_id": "Company_N",
+      "company_id": "Company_O",
       "email_text": null,
       "status": "ghosted",
       "days_since_application": 45
     },
     {
-      "company_id": "Company_O",
+      "company_id": "Company_P",
       "email_text": null,
       "status": "ghosted",
       "days_since_application": 90
     },
     {
-      "company_id": "Company_P",
+      "company_id": "Company_Q",
       "email_text": null,
       "status": "ghosted",
       "days_since_application": 30
     },
     {
-      "company_id": "Company_Q",
+      "company_id": "Company_R",
       "email_text": null,
       "status": "ghosted",
       "days_since_application": 120

@@ -11,7 +11,7 @@ import torch
 # Load data
 with open('data/email.json', 'r') as f:
     data = json.load(f)
-
+print("....load")
 vader = SentimentIntensityAnalyzer()
 afinn = Afinn()
 

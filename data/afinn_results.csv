@@ -11,4 +11,5 @@ Company_I,Frontend Developer,rejection,18.0,"{""thank"": 2.0, ""interest"": 1.0,
 Company_J,Technical Role,rejection,6.0,"{""fit"": 1.0, ""agreed"": 1.0, ""stronger"": 2.0, ""free"": 1.0, ""want"": 1.0}",{},5,0,95
 Company_K,Unknown,rejection,9.0,"{""thank"": 2.0, ""interest"": 1.0, ""good"": 3.0, ""luck"": 3.0}",{},4,0,47
 Company_L,Junior Data Engineer Trainee,rejection,11.0,"{""thank"": 2.0, ""join"": 1.0, ""competencies"": 1.0, ""interest"": 1.0, ""wish"": 1.0, ""best"": 3.0, ""luck"": 3.0}","{""forced"": -1.0, ""regret"": -2.0}",7,2,69
-Company_M,Software Developer,feedback_rejection,16.0,"{""dear"": 2.0, ""thank"": 2.0, ""focused"": 2.0, ""convinced"": 1.0, ""motivation"": 1.0, ""opportunities"": 2.0, ""strengthen"": 2.0, ""wish"": 1.0, ""best"": 3.0}",{},9,0,85
+Company_M,Junior Web developer,rejection,15.0,"{""dear"": 2.0, ""thank"": 2.0, ""interest"": 1.0, ""appreciate"": 2.0, ""care"": 2.0, ""reached"": 1.0, ""sincerely"": 2.0, ""encourage"": 2.0, ""opportunities"": 2.0}","{""unable"": -2.0}",9,1,117
+Company_N,Software Developer,feedback_rejection,16.0,"{""dear"": 2.0, ""thank"": 2.0, ""focused"": 2.0, ""convinced"": 1.0, ""motivation"": 1.0, ""opportunities"": 2.0, ""strengthen"": 2.0, ""wish"": 1.0, ""best"": 3.0}",{},9,0,85
