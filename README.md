@@ -11,10 +11,9 @@
 
 **Key Findings:**
 
-- 💬 **Joy words predict warmth**: "Hope," "wish," "best" correlate +0.605 with sentiment (3× stronger than any other factor)
-- ⚖️ **The 4:1 rule**: Each apology needs 4+ positive words to maintain warmth
-- 🤖 **Transformers > Lexicons**: Context-aware models detect patterns lexicons miss
-- 📧 **Automation ≠ coldness**: Templates can be warm with the right wording
+- **Joy words predict warmth**: "Hope," "wish," "best" correlate **+0.605** with sentiment (5× stronger than trust, 10× stronger than anticipation)
+- **The 4:1 rule**: Each apology needs **minimum 4 positive words** to maintain warmth (6:1 is optimal)
+- **Transformers > Lexicons**: Context-aware models detect rejection patterns lexicons miss
 
 **Dataset:** Real rejection emails analyzed with VADER, RoBERTa, emotion lexicons, and SHAP.
 
@@ -56,7 +55,7 @@ This analysis doesn't expect recruiters to hand-craft every rejection. At scale,
 ![Joy vs Sentiment](visualizations/emotion_sentiment_heatmap.png)
 _Figure 1: Strong correlation between joy-based emotion words and overall sentiment score._
 
-**Discovery:** Joy-based emotion (NRC lexicon) is the strongest predictor of sentiment (r = +0.6). 5x stronger than trust (+0.12), 10x stronger than anticipation (+0.06)
+**Discovery:** Joy-based emotion (NRC lexicon) is the strongest predictor of sentiment (r = +0.605). 5× stronger than trust (+0.116), 10× stronger than anticipation (+0.057)
 
 **What are joy words?**
 
@@ -78,6 +77,7 @@ Rejection emails need **at least 4 positive words** to feel warm.
 | **Safe Zone**    | 6:1+  | 100% warm     | Company_B: 8:1 → 0.988 |
 
 ![Positive Word Gradient](visualizations/4_to_1_threshold_analysis.png)
+_Figure 2: Sentiment scores increase sharply once the positive-to-apology word ratio exceeds 4:1._
 
 #### How I Calculated It
 
@@ -108,7 +108,7 @@ Breakeven ratio: 0.154 ÷ 0.025 = 6.2:1
 ### Finding #3: The Lexicon vs Transformer Gap
 
 ![compare_models.png](visualizations/correlation_heatmap_models.png)
-_Figure 6: Correlation heatmap comparing lexicon-based models (VADER, TextBlob, AFINN) versus transformer models (RoBERTa, SST-2)._
+_Figure 3: Correlation heatmap comparing lexicon-based models (VADER, TextBlob, AFINN) versus transformer models (RoBERTa, SST-2)._
 
 **Discovery:** Lexicon-based models (VADER, AFINN) can be fooled by polite language, while transformer models (RoBERTa) detect the underlying rejection.
 
@@ -145,75 +145,89 @@ RoBERTa logic:
 
 **Discovery:** Using SHAP (SHapley Additive exPlanations), we can see exactly which words push sentiment up or down.
 
+#### The Pattern: Positive Forces vs Negative Forces
+
+The warmest emails don't just have more positives. They strategically minimize negatives.
+
 ![SHAP Word Attributions](visualizations/shap_word_importance_4panel.png)
-_Figure 3: Word-level importance analysis showing which words drive RoBERTa's sentiment decisions for each email._
+_Figure 4: Word-level importance analysis showing which words drive RoBERTa's sentiment decisions for each email._
 
-#### Case Study: Company B (VADER 0.988, RoBERTa 0.170)
+**The Three Outcomes:**
 
-**Why the huge gap?**
+| Email Type               | Positive Sum | Negative Sum | Net Impact | Result                      |
+| ------------------------ | ------------ | ------------ | ---------- | --------------------------- |
+| **Warm** (Company F)     | +2.67        | -0.45        | **+2.22**  | Both models agree (0.99) ✅ |
+| **Confused** (Company B) | +2.46        | -1.30        | **+1.16**  | VADER 0.99, RoBERTa 0.17 ⚠️ |
+| **Cold** (Company D)     | +0.87        | -1.41        | **-0.54**  | Both models agree (0.31) ❌ |
 
-**Positive forces (SHAP values):**
+### Finding #5: The Words That Kill Warmth
 
-- "great" → +0.51
-- "amongst" → +0.34
-- "interest" → +0.12
-- "best" → +0.10
-- **Total positive: +2.46**
+After analyzing SHAP values across all 14 companies, clear patterns emerged:
 
-**Negative forces:**
+#### ☠️ The Most Damaging Words
 
-- "unfortunately" → -0.38
-- "proceed" → -0.35
-- "not" → -0.13
-- "sorry" → -0.08
-- **Total negative: -1.30**
+![Most Damaging Words](visualizations/shap_worst_words_across_all.png)
 
-**Net impact: +2.46 - 1.30 = +1.16**
+_Figure 5: The 15 most damaging words across all companies, ranked by SHAP impact._
+| Word | Impact | Company | Notes |
+|---------------|--------:|-----------|-----------------------------------------------------------------------|
+| Unfortunately | -0.7727 | Company_C | Single worst word in the dataset. Transformers associate it with rejection; a **learned rejection pattern**. |
+| Regret | -0.7341 | Company_G | Sounds polite, but worse than "sorry" (-0.47) for transformers. |
 
-**The problem:** Despite having positive words, the phrase "unfortunately, we decided not to proceed" carries massive negative weight (-1.30 combined). Positive words BARELY overcome this.
+### Finding #6: The Winner's Strategy (Company F Case Study)
 
-#### Comparison: Company F (VADER 0.990, RoBERTa 0.874)
+**Why Company F scored 0.990 (warmest):**
 
-**Both agree it's warm. Why?**
+```
+POSITIVE FORCES:
+  appreciate   +0.39  ← Rare but powerful
+  Thank        +0.42
+  value        +0.39  ← Shows genuine care
+  happy        +0.26  ← Joy word
+  impressed    +0.18
+  Total:       +2.67  (HIGHEST in dataset)
 
-**Positive forces:**
+NEGATIVE FORCES:
+  disappointing -0.17  ← Smart choice! Not "sorry"
+  unfortunately -0.12  ← Weak form
+  Total:         -0.45  (LOWEST in dataset)
 
-- "Thank" → +0.42
-- "value" → +0.39
-- "happy" → +0.26
-- "impressed" → +0.18
-- "effort" → +0.17
-- **Total positive: +2.67**
+NET: +2.22 (best in dataset)
+```
 
-**Negative forces:**
+**The secret:** Used "disappointing" instead of "sorry" = 64% less negative!
 
-- "disappointing" → -0.17
-- "unfortunately" → -0.12
-- **Total negative: -0.45**
+**Result:**
 
-**Net impact: +2.67 - 0.45 = +2.22**
+- VADER: 0.990 ✅
+- RoBERTa: 0.874 ✅
+- Gap: 0.116 (both models agree it's warm)
 
-**The strategy:** Floods with strong positive words that OVERWHELM weak negatives. Uses "disappointing" (less negative) instead of "sorry" (more negative).
+---
 
-#### Comparison: Company D (Both Agree It's Cold)
+## 💡 What This Means
 
-**VADER 0.307, RoBERTa -0.282**
+### For Companies Writing Rejections
 
-**Positive forces:**
+**The Template Upgrade Guide:**
 
-- "Hopefully" → +0.12
-- "skills" → +0.11
-- **Total positive: +0.87**
+✅ **DO:**
 
-**Negative forces:**
+- Use "appreciate" instead of generic "thank" (+315% more impact)
+- Include 2 joy words: "wish you the best" or "hope you find a great fit"
+- Follow 6:1 ratio: 6 positives per 1 apology (safe zone)
+- Be specific: "impressed by your approach to X" > "you're qualified"
+- Use "disappointed" if acknowledging outcome (-0.17 impact)
 
-- "sorry" → -0.47
-- "Unfortunately" → -0.42
-- **Total negative: -1.41**
+❌ **AVOID:**
 
-**Net impact: +0.87 - 1.41 = -0.54**
+- "Unfortunately" (-0.77 impact) - skip this word entirely
+- "Regret" (-0.73 impact) - worse than "sorry"
+- Multiple apologies (2+ = guaranteed cold email)
+- Generic praise without specifics
+- Emails under 50 words (feels rushed)
 
-**The problem:** Strong negative words with minimal positive compensation. Both models agree: this is cold.
+---
 
 ## 🔍 How I Did This
 
@@ -251,52 +265,9 @@ _Figure 3: Word-level importance analysis showing which words drive RoBERTa's se
 
 ---
 
-## 💡 What This Means
-
-### For Job Seekers (That's Me!)
-
-- **Don't take it personally** - "warmth" is often just following a template
-- **Red flag**: Email with 0 joy words and 2+ apologies = they didn't try
-- **Green flag**: 2+ joy words and personal details = they actually care
-
-### For Companies Writing Rejections
-
-**Want to make rejections feel warmer? Here's the cheat sheet:**
-
-1. **Include joy words** (biggest impact):
-
-   - "We wish you the best in your search"
-   - "Good luck with your future endeavors"
-   - "We hope you find a great fit"
-
-2. **Follow the 4:1 rule**:
-
-   - Each "sorry" or "unfortunately" needs 4+ positive words
-   - Better: 1 apology + 6 positives
-   - Best: 0 apologies + focus on positives
-
-3. **Be specific**:
-   - "We were impressed by your X" is better than "You're qualified"
-   - "Thank you for your thoughtful approach to Y" is better than "Thanks for applying"
-
----
-
-## 🛠️ Technical Details
-
-### Tools
-
-- Python for all analysis
-- VADER, TextBlob, AFINN for basic sentiment
-- RoBERTa transformer model for smart AI analysis
-- NRC Emotion Lexicon for emotion detection
-- SHAP for explaining which words matter
-- Matplotlib/Seaborn for charts
-
----
-
 ## ⚠️ Limitations
 
-**Small sample:** Only 13 emails. This is exploratory, not definitive.
+**Small sample:** Only 14 emails. This is exploratory, not definitive.
 
 **Paraphrased:** I rewrote emails to protect company privacy, which might have changed some details.
 
@@ -310,4 +281,4 @@ As AI increasingly becomes the “first reader” of written communications, hum
 
 ## 🎨 Interactive Dashboard
 
-An interactive dashboard visualizing these findings is available [here](https://your-dashboard-link.com) (link to be added once live).
+An interactive dashboard visualizing these findings is available [here](https://language-of-rejection.streamlit.app/).
