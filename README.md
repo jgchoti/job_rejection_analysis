@@ -99,6 +99,7 @@ Breakeven ratio: 0.154 ÷ 0.025 = 6.2:1
 ### Finding #3: The Lexicon vs Transformer Gap
 
 ![compare_models.png](visualizations/correlation_heatmap_models.png)
+
 _Figure 3: Correlation heatmap comparing lexicon-based models (VADER, TextBlob, AFINN) versus transformer models (RoBERTa, SST-2)._
 
 **Discovery:** Lexicon-based models (VADER, AFINN) can be fooled by polite language, while transformer models (RoBERTa) detect the underlying rejection.
