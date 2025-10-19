@@ -283,4 +283,4 @@ As AI increasingly becomes the “first reader” of written communications, hum
 ## 🎨 Interactive Dashboard
 
 An interactive dashboard visualizing these findings is available [here](https://language-of-rejection.streamlit.app/).
-![Live Demo](assets/gif-rejection-dashboard.git)
+![Live Demo](assets/gif-rejection-dashboard.gif)
