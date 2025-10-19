@@ -87,16 +87,23 @@ def analyze_text(text):
 
 
 st.sidebar.title("💔 Navigation")
-
 if "page" not in st.session_state:
     st.session_state.page = "🏠 The Story"
-st.session_state.page = st.sidebar.radio(
-    "Choose a section:",
-    ["🏠 The Story", "📊 The Data", "🔬 Deep Dive: SHAP", "🧪 Try It Yourself"],
-    index=["🏠 The Story", "📊 The Data", "🔬 Deep Dive: SHAP", "🧪 Try It Yourself"]
-          .index(st.session_state.page),
-    label_visibility="collapsed"
-)
+
+pages = ["🏠 The Story", "📊 The Data", "🔬 Deep Dive: SHAP", "🧪 Try It Yourself"]
+
+for page in pages:
+    if st.session_state.page == page:
+        st.sidebar.button(
+            f"✅ {page}",
+            use_container_width=True,
+            disabled=True,
+            type="primary"
+        )
+    else:
+        if st.sidebar.button(page, use_container_width=True):
+            st.session_state.page = page
+            st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📌 Quick Stats")
