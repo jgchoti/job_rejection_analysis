@@ -16,115 +16,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.markdown("""
-<style>
-    .main {
-        background-color: #f8f9fa;
-    }
-    
-    h1 {
-        color: #2c3e50;
-        font-weight: 700;
-        padding-bottom: 10px;
-        border-bottom: 3px solid #3498db;
-    }
-    
-    h2 {
-        color: #34495e;
-        font-weight: 600;
-        margin-top: 30px;
-    }
-    
-    h3 {
-        color: #7f8c8d;
-        font-weight: 500;
-    }
-    
-    [data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: bold;
-    }
-    
-    .stAlert {
-        border-radius: 10px;
-    }
-    
-    [data-testid="stSidebar"] {
-        background-color: #ffffff;
-        border-right: 2px solid #e0e0e0;
-    }
-    
-    .stButton>button {
-        background-color: #3498db;
-        color: white;
-        border-radius: 8px;
-        border: none;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-    }
-    
-    .stButton>button:hover {
-        background-color: #2980b9;
-    }
-    
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background-color: #ecf0f1;
-        border-radius: 8px 8px 0 0;
-        padding: 10px 20px;
-        font-weight: 600;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: #3498db;
-        color: white;
-    }
-    
-    .story-section {
-        background-color: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-    }
-    
-    .quote-box {
-        background-color: #eef2f7;
-        border-left: 4px solid #3498db;
-        padding: 15px 20px;
-        margin: 20px 0;
-        font-style: italic;
-        border-radius: 4px;
-    }
-    
-    .highlight {
-        background-color: #fff9c4;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-weight: 600;
-    }
-    
-    .danger-box {
-        background-color: #ffebee;
-        border-left: 4px solid #e74c3c;
-        padding: 15px 20px;
-        margin: 15px 0;
-        border-radius: 4px;
-    }
-    
-    .success-box {
-        background-color: #e8f5e9;
-        border-left: 4px solid #2ecc71;
-        padding: 15px 20px;
-        margin: 15px 0;
-        border-radius: 4px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 @st.cache_data
 def load_data():
     df = pd.read_csv('data/rejection_analysis_extended.csv')
@@ -196,9 +87,14 @@ def analyze_text(text):
 
 
 st.sidebar.title("💔 Navigation")
-page = st.sidebar.radio(
+
+if "page" not in st.session_state:
+    st.session_state.page = "🏠 The Story"
+st.session_state.page = st.sidebar.radio(
     "Choose a section:",
     ["🏠 The Story", "📊 The Data", "🔬 Deep Dive: SHAP", "🧪 Try It Yourself"],
+    index=["🏠 The Story", "📊 The Data", "🔬 Deep Dive: SHAP", "🧪 Try It Yourself"]
+          .index(st.session_state.page),
     label_visibility="collapsed"
 )
 
@@ -211,7 +107,7 @@ st.sidebar.metric("The Magic Ratio", "4:1")
 st.sidebar.markdown("---")
 st.sidebar.markdown("[GitHub](https://github.com/jgchoti/job_rejection_analysis) | [LinkedIn](https://www.linkedin.com/in/chotirat/)")
 
-if page == "🏠 The Story":
+if st.session_state.page == "🏠 The Story":
     st.title("💔 The Language of Rejection")
     st.markdown("### What makes some rejection emails feel warm while others feel crushing?")
     
@@ -219,24 +115,27 @@ if page == "🏠 The Story":
     
     col1, col2, col3 = st.columns([1, 2, 1])  
     with col2:
-        st.image("assets/ophelia.jpg")
+        st.image("assets/ophelia.jpg", caption="*Ophelia* (1851–52) — Sir John Everett Millais",)
     
     # Introduction
     st.markdown("""
-    <div class="story-section">
+    <div style="background-color: #FEF3E5; padding: 25px; border-radius: 12px; border-left: 6px solid #CC7C60;">
     <h2>📖 How This Started</h2>
     <p style="font-size: 1.1rem; line-height: 1.8;">
-    After receiving my 14th job rejection, something clicked. Instead of feeling frustrated, 
+    After receiving many job rejection, something clicked. Instead of feeling frustrated, 
     I got curious: <b>could I quantify what makes a rejection feel "warm" or "cold"?</b>
     </p>
     <p style="font-size: 1.1rem; line-height: 1.8;">
-    I collected all 14 rejection emails, anonymized them, and analyzed them using 
-    Natural Language Processing. What I found surprised me.
+    I collected all rejection emails (2024-2025), anonymized them, and analyzed them using 
+    Natural Language Processing(NLP).
+    </p>
+    <p style="font-size: 1rem; margin-top: 10px;">
+    For the full code, visit my <a href="https://github.com/jgchoti/job_rejection_analysis" target="_blank" >GitHub repository</a>.
     </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # The Dramatic Comparison
+    st.markdown("---")
+    st.markdown("")
     st.markdown("### 📧 The Tale of Two Emails")
     
     col1, col2 = st.columns(2)
@@ -272,13 +171,10 @@ if page == "🏠 The Story":
         </p>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="quote-box">
-    <b>The difference?</b> 68 words.
+    st.write("") 
+    st.warning("""***The difference?*** 68 words.
     Completely different emotional impact.
-    </div>
-    """, unsafe_allow_html=True)
+    """)
     
     # Key Findings
     st.markdown("### 🔍 What I Discovered")
@@ -318,10 +214,10 @@ if page == "🏠 The Story":
     with finding_col3:
         st.markdown("""
         <div style="background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%;">
-        <h3 style="color: #9b59b6; margin-top: 0;">🤖 Finding #3</h3>
+        <h3 style="color: #9b59b6; margin-top: 0;">🧪 Finding #3</h3>
         <h4>Context Matters</h4>
         <p style="font-size: 0.95rem; line-height: 1.6;">
-        Transformers detect <b>hollow politeness</b> that simple word-counting misses.
+        Transformers detect <b>empty politeness </b> that simple word-counting overlook.
         </p>
         <p style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 0;">
         <i>Some emails score 0.97 (lexicon) but -0.17 (transformer).</i>
@@ -333,27 +229,28 @@ if page == "🏠 The Story":
     
     # Why It Matters
     st.markdown("""
-    <div class="story-section">
+    <div style="background-color: #FEF3E5; padding: 25px; border-radius: 12px; border-left: 6px solid #CC7C60;">
     <h2>💡 Why This Matters</h2>
-    <div style="font-size: 1.05rem; line-height: 1.8;">
+    <div style="font-size: 1.05rem; line-height: 1.8; color: #212121;">
     <p><b>For job seekers like me:</b> That sinking feeling after a cold rejection? 
     It's not personal. It's just a bad template. Some companies accidentally crush spirits. 
     Others lift them. Neither is intentional.</p>
-    
-    <p><b>For recruiters:</b> You can say "no" and still make someone's day better. 
-    Small template improvements create measurably better candidate experiences. 
-    Same automation. Different outcomes.</p>
-    
+
+    <p><b>For business:</b> Small improvements to templates—like warm language and clear next steps—aren’t just nice. With AI reading emails first, setting the right tone helps algorithms recognize your intent as positive, influencing how messages are categorized and analyzed. Same automation. Different outcomes.</p>
+
     <p style="margin-bottom: 0;"><b>The bigger point:</b> Rejection is unavoidable in hiring. 
     Cruelty is optional.</p>
     </div>
     </div>
     """, unsafe_allow_html=True)
+
     
     st.markdown("---")
-    st.markdown("👉 **Explore the data in the next section to see exactly how we measured this.**")
-
-elif page == "📊 The Data":
+    st.markdown("👉 **Explore the data in the next section to see exactly how I measured this.**")
+    if st.button("Next → 📊 The Data"):
+        st.session_state.page = "📊 The Data"
+        st.rerun()
+elif st.session_state.page == "📊 The Data":
     st.title("📊 The Data Behind the Story")
     st.markdown("### Let's look at the numbers that prove these patterns are real")
     
@@ -385,7 +282,7 @@ elif page == "📊 The Data":
     - 10× stronger than anticipation (+0.057)
     """)
     
-    # Graph 1: Joy vs Warmth
+
     fig1 = px.scatter(
         df,
         x='emotion_joy',
@@ -529,7 +426,7 @@ elif page == "📊 The Data":
         <p style="margin-bottom: 0;">{warm_safe} of {total_safe} are warm</p>
         </div>
         """, unsafe_allow_html=True)
-    
+    st.markdown("")
     st.success("**💡 Key Insight:** Below 4:1 ratio = 0% success rate. Above 4:1 = guaranteed warm. The threshold is empirically proven.")
     
     st.markdown("---")
@@ -575,15 +472,15 @@ elif page == "📊 The Data":
     summary_df.columns = ['Company', 'Warmth Score', 'Joy Words', 'Positive Words', 'Apologies']
     summary_df = summary_df.round(3)
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
+    
 
-
-elif page == "🔬 Deep Dive: SHAP":
+elif st.session_state.page == "🔬 Deep Dive: SHAP":
     st.title("🔬 Deep Dive: SHAP Word Analysis")
     st.markdown("### Which specific words push sentiment up or down? Let's find out.")
     
     st.markdown("""
     **SHAP (SHapley Additive exPlanations)** reveals the exact contribution of each word 
-    to RoBERTa's sentiment decision. This is where we find the **real insights** - 
+    to RoBERTa's sentiment decision. This is where I find the **real insights** - 
     which words companies should use, and which they should avoid.
     """)
     
@@ -635,7 +532,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col1:
             st.markdown("""
-            <div class="danger-box">
+            <div style="background-color: #F3EDFA; padding: 20px; border-radius: 10px;>
             <h4>🚨 The "Unfortunately" Disaster</h4>
             <p><b>Company_C: -0.7727</b> (worst word in dataset!)</p>
             <p>This single word crushes sentiment. VADER thinks the email is positive (0.974), 
@@ -648,7 +545,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col2:
             st.markdown("""
-            <div class="danger-box">
+            <div style="background-color: #F3EDFA; padding: 20px; border-radius: 10px;>
             <h4>💀 The "Regret" Problem</h4>
             <p><b>Company_G: -0.7341</b> (second-worst!)</p>
             <p>"Regret" sounds polite, but it's actually <b>worse than "sorry"</b> (-0.47) 
@@ -726,7 +623,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col1:
             st.markdown("""
-            <div class="success-box">
+            <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px;">
             <h4>🏆 #1: "Appreciate"</h4>
             <p><b>Average Impact: +0.52</b></p>
             <p>Appears in 5 emails with consistently strong positive impact.</p>
@@ -737,7 +634,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col2:
             st.markdown("""
-            <div class="success-box">
+              <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px;">
             <h4>🥈 #2: "Thank"</h4>
             <p><b>Average Impact: +0.47</b></p>
             <p>Most frequent positive word. Appears in 10+ emails.</p>
@@ -748,7 +645,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col3:
             st.markdown("""
-            <div class="success-box">
+              <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px;">
             <h4>🥉 #3: "Value"</h4>
             <p><b>Average Impact: +0.39</b></p>
             <p>Rare but powerful. Shows genuine appreciation.</p>
@@ -903,7 +800,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col1:
             st.markdown("""
-            <div class="success-box">
+            <div style="background-color: #e8f5e9; padding: 20px; border-radius: 10px;">
             <h4>✅ What They Did Right</h4>
             <ul>
                 <li><b>Strong positives:</b> Used powerful words like "appreciate" (+0.54), "value" (+0.39), "happy" (+0.26)</li>
@@ -947,7 +844,7 @@ elif page == "🔬 Deep Dive: SHAP":
             
             st.plotly_chart(fig_f, use_container_width=True)
         
-        st.success(f"""
+        st.warning(f"""
         **Result:** 
         - VADER: {company_f['vader']:.3f} (very warm)
         - RoBERTa: {company_f['roberta']:.3f} (very warm)
@@ -967,7 +864,7 @@ elif page == "🔬 Deep Dive: SHAP":
         
         with col1:
             st.markdown("""
-            <div class="danger-box">
+            <div style="background-color: #F3EDFA; padding: 20px; border-radius: 10px;">
             <h4>❌ What Went Wrong</h4>
             <ul>
                 <li><b>The killer word:</b> "Unfortunately" with -0.7727 impact (worst in dataset!)</li>
@@ -1011,7 +908,7 @@ elif page == "🔬 Deep Dive: SHAP":
             
             st.plotly_chart(fig_c, use_container_width=True)
         
-        st.error(f"""
+        st.warning(f"""
         **Result:**
         - VADER: {company_c['vader']:.3f} (thinks it's warm!)
         - RoBERTa: {company_c['roberta']:.3f} (knows it's cold!)
